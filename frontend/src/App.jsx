@@ -426,7 +426,8 @@ export default function App() {
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveScreen('feed')}>
               <ShareMealLogo isDonor={isDonor} className="h-8 w-8" />
-              <span className="text-xl font-extrabold tracking-tight">ShareMeal</span>
+              {/* <span className="text-xl font-extrabold tracking-tight">ShareMeal</span> */}
+              <span className="hidden sm:block text-xl font-extrabold tracking-tight">ShareMeal</span>
             </div>
             <div className="hidden sm:block"><LiveLocationBadge isDonor={isDonor} /></div>
           </div>
@@ -436,7 +437,8 @@ export default function App() {
             
             <div className="h-5 w-[1px] bg-gray-200 hidden sm:block" />
 
-            <div className="relative bg-[#EBEDEA] p-1 rounded-xl hidden sm:flex items-center border border-gray-200/50 w-44 h-10 shadow-inner">
+            {/* <div className="relative bg-[#EBEDEA] p-1 rounded-xl hidden sm:flex items-center border border-gray-200/50 w-44 h-10 shadow-inner"> */}
+            <div className="relative bg-[#EBEDEA] p-1 rounded-xl flex items-center border border-gray-200/50 w-44 h-10 shadow-inner">
               <div className={`absolute top-1 bottom-1 left-1 rounded-lg transition-all duration-300 shadow-sm ${isDonor ? 'w-[82px] translate-x-0 bg-[#0B3529]' : 'w-[82px] translate-x-[80px] bg-[#2E0854]'}`} />
               <button onClick={() => toggleRole('donor')} className={`z-10 flex-1 flex items-center justify-center gap-1 h-full text-xs font-bold cursor-pointer transition-colors ${isDonor ? 'text-[#D4AF37]' : 'text-gray-500'}`}><Building size={12} /> Donor</button>
               <button onClick={() => toggleRole('volunteer')} className={`z-10 flex-1 flex items-center justify-center gap-1 h-full text-xs font-bold cursor-pointer transition-colors ${!isDonor ? 'text-[#FF6B35]' : 'text-gray-500'}`}><User size={12} /> Rescue</button>
