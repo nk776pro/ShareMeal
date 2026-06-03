@@ -139,8 +139,11 @@ function LegalModal({ isOpen, type, onClose }) {
 export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('sharemeal_user')) || null);
   const [token, setToken] = useState(localStorage.getItem('sharemeal_token') || null);
+  
+  // Auth Form State (UPDATED FOR OTP)
   const [authMode, setAuthMode] = useState('login'); 
-  const [authForm, setAuthForm] = useState({ name: '', mobile: '', password: '', role: 'volunteer' });
+  const [authStep, setAuthStep] = useState(1);
+  const [authForm, setAuthForm] = useState({ name: '', mobile: '', password: '', role: 'volunteer', otp: '' });
   const [authError, setAuthError] = useState('');
 
   // Active UI Navigation States
@@ -151,6 +154,7 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   // Data Streams
   const [listings, setListings] = useState([]);
   const [feedFilter, setFeedFilter] = useState('all'); 
@@ -205,10 +209,31 @@ export default function App() {
     return () => clearInterval(interval);
   }, [user]);
 
+  // UPDATED AUTHENTICATION HANDLER
   const handleAuth = async (e) => {
     e.preventDefault();
     setAuthError('');
+    
+    // STEP 1: Request OTP
+    if (authStep === 1) {
+      setIsSubmitting(true);
+      try {
+        const res = await fetch(`${BACKEND_URL}/auth/request-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mobile: authForm.mobile })
+        });
+        const data = await res.json();
+        if (data.error) { setAuthError(data.error); } 
+        else { setAuthStep(2); } // Move to OTP entry screen
+      } catch (err) { setAuthError('Failed to request OTP. Check connection.'); }
+      finally { setIsSubmitting(false); }
+      return;
+    }
+
+    // STEP 2: Verify OTP and Login/Register
     try {
+      setIsSubmitting(true);
       const res = await fetch(`${BACKEND_URL}/auth/${authMode}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -222,7 +247,9 @@ export default function App() {
       setToken(data.token);
       setUser(data.user);
       setActiveScreen('feed');
+      setAuthStep(1); // Reset for future logouts
     } catch (err) { setAuthError('Connection error. Please try again.'); }
+    finally { setIsSubmitting(false); }
   };
 
   const handleUpdateProfile = async (e) => {
@@ -382,36 +409,59 @@ export default function App() {
   const archivedRunsCount = userListings.filter(l => l.status === 'completed').length;
   const totalSavedPlatesCount = userListings.filter(l => l.status === 'completed').reduce((sum, item) => sum + (item.totalServings || 0), 0);
 
+  // UPDATED AUTHENTICATION RENDER
   if (!user) {
     return (
       <div className="min-h-screen bg-[#F3F5F4] flex flex-col items-center justify-center p-4 tracking-tight">
-        <div className="w-full max-w-sm bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-          <ShareMealLogo isDonor={true} className="h-12 w-12 mx-auto mb-3" />
+        <div className="w-full max-w-sm bg-white p-8 rounded-3xl shadow-sm border border-gray-100 relative">
+          
+          {authStep === 2 && (
+            <button onClick={() => setAuthStep(1)} className="absolute top-6 left-6 text-gray-400 hover:text-gray-700 text-sm font-bold flex items-center gap-1 cursor-pointer">
+              ← Back
+            </button>
+          )}
+
+          <ShareMealLogo isDonor={true} className="h-12 w-12 mx-auto mb-3 mt-4" />
           <h1 className="text-2xl font-bold text-[#0B3529] tracking-tight text-center">Welcome to ShareMeal</h1>
           <p className="text-sm text-emerald-800/70 mt-1 font-medium text-center mb-6">Connecting surplus food with those in need</p>
 
           {authError && <div className="mb-4 p-3 bg-rose-50 text-rose-700 text-sm font-semibold rounded-xl text-center border border-rose-100">{authError}</div>}
 
           <form onSubmit={handleAuth} className="space-y-4">
-            {authMode === 'register' && <input type="text" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Your Name / Organization" value={authForm.name} onChange={e => setAuthForm({...authForm, name: e.target.value})} />}
-            <input type="tel" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Mobile Number" value={authForm.mobile} onChange={e => setAuthForm({...authForm, mobile: e.target.value})} />
-            <input type="password" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Password" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} />
+            {authStep === 1 ? (
+              <>
+                {authMode === 'register' && <input type="text" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Your Name / Organization" value={authForm.name} onChange={e => setAuthForm({...authForm, name: e.target.value})} />}
+                <input type="tel" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Mobile Number" value={authForm.mobile} onChange={e => setAuthForm({...authForm, mobile: e.target.value})} />
+                <input type="password" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Password" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} />
 
-            {authMode === 'register' && (
-              <div className="grid grid-cols-2 gap-2 p-1.5 bg-[#F3F5F4] rounded-xl border border-gray-200/50">
-                <button type="button" onClick={() => setAuthForm({...authForm, role: 'volunteer'})} className={`py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${authForm.role === 'volunteer' ? 'bg-white text-[#0B3529] shadow-sm' : 'text-gray-500'}`}>NGO / Rescue</button>
-                <button type="button" onClick={() => setAuthForm({...authForm, role: 'donor'})} className={`py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${authForm.role === 'donor' ? 'bg-white text-[#0B3529] shadow-sm' : 'text-gray-500'}`}>Food Donor</button>
+                {authMode === 'register' && (
+                  <div className="grid grid-cols-2 gap-2 p-1.5 bg-[#F3F5F4] rounded-xl border border-gray-200/50">
+                    <button type="button" onClick={() => setAuthForm({...authForm, role: 'volunteer'})} className={`py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${authForm.role === 'volunteer' ? 'bg-white text-[#0B3529] shadow-sm' : 'text-gray-500'}`}>NGO / Rescue</button>
+                    <button type="button" onClick={() => setAuthForm({...authForm, role: 'donor'})} className={`py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${authForm.role === 'donor' ? 'bg-white text-[#0B3529] shadow-sm' : 'text-gray-500'}`}>Food Donor</button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="animate-[fadeIn_0.3s_ease-out]">
+                <div className="p-3 bg-emerald-50/50 text-emerald-800 text-xs font-semibold rounded-xl border border-emerald-100 mb-4 text-center">
+                  Secure OTP sent to <br/><span className="text-sm font-black">{authForm.mobile}</span>
+                </div>
+                <input type="text" maxLength="6" required className="w-full text-center tracking-[0.5em] text-2xl px-4 py-4 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-bold text-[#0B3529] outline-none" placeholder="••••••" value={authForm.otp} onChange={e => setAuthForm({...authForm, otp: e.target.value})} />
               </div>
             )}
-            <button type="submit" className="w-full py-3.5 bg-[#0B3529] text-[#D4AF37] font-bold text-sm rounded-xl hover:opacity-95 shadow-md transition-all cursor-pointer">
-              {authMode === 'login' ? 'Log In' : 'Create Account'}
+            
+            <button type="submit" disabled={isSubmitting} className={`w-full py-3.5 bg-[#0B3529] text-[#D4AF37] font-bold text-sm rounded-xl hover:opacity-95 shadow-md transition-all cursor-pointer ${isSubmitting ? 'opacity-70' : 'hover:opacity-95'}`}>
+              {authStep === 1 ? 'Request Secure OTP' : (authMode === 'login' ? 'Verify & Log In' : 'Verify & Create Account')}
             </button>
           </form>
-          <div className="mt-6 text-center">
-            <button onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')} className="text-sm font-semibold text-[#125441] hover:text-[#0B3529] cursor-pointer">
-              {authMode === 'login' ? "Need an account? Sign up" : "Already have an account? Log in"}
-            </button>
-          </div>
+          
+          {authStep === 1 && (
+            <div className="mt-6 text-center">
+              <button onClick={() => { setAuthMode(authMode === 'login' ? 'register' : 'login'); setAuthError(''); }} className="text-sm font-semibold text-[#125441] hover:text-[#0B3529] cursor-pointer">
+                {authMode === 'login' ? "Need an account? Sign up" : "Already have an account? Log in"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -420,7 +470,8 @@ export default function App() {
   return (
     <div className={`flex flex-col min-h-screen bg-[#FAFAFA] ${theme.primaryText} font-sans antialiased tracking-tight transition-all duration-300 ease-out ${isTransitioning ? 'opacity-30 scale-[0.99] filter blur-sm' : 'opacity-100 scale-100'}`}>
       
-     {/* GLOBAL NAVBAR */}
+      {/* GLOBAL NAVBAR */}
+      {/* GLOBAL NAVBAR */}
       <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 z-50 shadow-sm shrink-0">
         <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between relative">
           
@@ -434,7 +485,7 @@ export default function App() {
           </div>
 
           {/* MOBILE ONLY: CENTERED DONATE FOOD BUTTON */}
-          {user.role === 'donor' && (
+          {user?.role === 'donor' && (
             <button 
               onClick={() => { setActiveScreen('create'); setIsMobileMenuOpen(false); }} 
               className={`sm:hidden text-xs font-bold flex items-center gap-1 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white px-3 py-2 rounded-xl shadow-sm absolute left-1/2 transform -translate-x-1/2 cursor-pointer transition-all ${activeScreen === 'create' ? 'ring-2 ring-emerald-400' : ''}`}
@@ -446,7 +497,7 @@ export default function App() {
           {/* DESKTOP ACTIONS: AUTO HIDDEN ON MOBILE */}
           <div className="hidden sm:flex items-center gap-6">
             <button onClick={() => setActiveScreen('feed')} className={`text-sm font-bold flex items-center gap-1.5 cursor-pointer transition-all ${activeScreen === 'feed' ? `${theme.primaryText} border-b-2 ${theme.accentBorder} pb-1` : 'text-gray-400 hover:text-gray-600'}`}><Compass size={16} /> <span>Find Food</span></button>
-            {user.role === 'donor' && <button onClick={() => setActiveScreen('create')} className={`text-sm font-bold flex items-center gap-1.5 cursor-pointer transition-all ${activeScreen === 'create' ? `${theme.primaryText} border-b-2 ${theme.accentBorder} pb-1` : 'text-gray-400 hover:text-gray-600'}`}><Plus size={16} /> <span>Donate Food</span></button>}
+            {user?.role === 'donor' && <button onClick={() => setActiveScreen('create')} className={`text-sm font-bold flex items-center gap-1.5 cursor-pointer transition-all ${activeScreen === 'create' ? `${theme.primaryText} border-b-2 ${theme.accentBorder} pb-1` : 'text-gray-400 hover:text-gray-600'}`}><Plus size={16} /> <span>Donate Food</span></button>}
             
             <div className="h-5 w-[1px] bg-gray-200" />
 
@@ -474,7 +525,6 @@ export default function App() {
         {/* MOBILE DROPDOWN MODAL SLIDE */}
         {isMobileMenuOpen && (
           <div className="sm:hidden absolute top-20 left-0 right-0 bg-white border-b border-gray-200 shadow-xl p-5 flex flex-col gap-4 z-40 animate-[fadeIn_0.2s_ease-out]">
-            {/* Find Food Option */}
             <button 
               onClick={() => { setActiveScreen('feed'); setIsMobileMenuOpen(false); }} 
               className={`w-full py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${activeScreen === 'feed' ? `${theme.lightBg} ${theme.primaryText}` : 'text-gray-600 hover:bg-gray-50'}`}
@@ -482,7 +532,6 @@ export default function App() {
               <Compass size={18} /> <span>Find Food</span>
             </button>
 
-            {/* Mobile Switch Role Toggle Box */}
             <div className="relative bg-[#EBEDEA] p-1 rounded-xl flex items-center border border-gray-200/50 w-full h-12 shadow-inner mt-1">
               <div 
                 className="absolute top-1 bottom-1 rounded-lg transition-all duration-300 shadow-sm"
@@ -508,7 +557,6 @@ export default function App() {
 
             <div className="h-[1px] bg-gray-100 my-1" />
 
-            {/* Account Center & Logout Controls Wrapper */}
             <div className="flex items-center justify-between gap-3">
               <button 
                 onClick={() => { setActiveScreen('account'); setIsMobileMenuOpen(false); }} 
@@ -527,8 +575,7 @@ export default function App() {
             </div>
           </div>
         )}
-      </nav>
-      {/* STREAM MONITOR HEADER */}
+      </nav>      {/* STREAM MONITOR HEADER */}
       {activeScreen === 'feed' && (
         <header className={`relative w-full py-16 px-6 border-b border-gray-100 overflow-hidden bg-gradient-to-b ${theme.heroGradient} shrink-0`}>
           <div className="max-w-4xl mx-auto text-center space-y-5">
@@ -629,7 +676,6 @@ export default function App() {
                               <div className="flex items-center gap-2">
                                 <a href={`tel:${item.contact}`} className="p-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl cursor-pointer"><PhoneCall size={16} /></a>
                                 
-                                {/* FIX LOGIC IMPLEMENTED HERE: Only show photo upload to Rescue/Volunteers. Donors see status track */}
                                 {!isDonor ? (
                                   <>
                                     <input type="file" accept="image/*" capture="environment" className="hidden" id={`camera-${item._id}`} onChange={(e) => handlePhotoUploadAndComplete(e, item._id)} />
