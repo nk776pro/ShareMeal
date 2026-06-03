@@ -4,7 +4,7 @@ import {
   MapPin, PhoneCall, Send, LogOut, Compass, 
   Search, ArrowRight, Heart, Star, 
   Filter, Plus, Flame, Sparkles, Camera, Building, 
-  User, UserCircle, Settings, Shield, Award, CheckCircle2
+  User, UserCircle, Settings, Shield, Award, CheckCircle2, Menu, X
 } from 'lucide-react';
 
 // ==========================================
@@ -150,7 +150,7 @@ export default function App() {
   const [legalModalType, setLegalModalType] = useState(null); 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   // Data Streams
   const [listings, setListings] = useState([]);
   const [feedFilter, setFeedFilter] = useState('all'); 
@@ -420,24 +420,36 @@ export default function App() {
   return (
     <div className={`flex flex-col min-h-screen bg-[#FAFAFA] ${theme.primaryText} font-sans antialiased tracking-tight transition-all duration-300 ease-out ${isTransitioning ? 'opacity-30 scale-[0.99] filter blur-sm' : 'opacity-100 scale-100'}`}>
       
-      {/* GLOBAL NAVBAR */}
+     {/* GLOBAL NAVBAR */}
       <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 z-50 shadow-sm shrink-0">
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between relative">
+          
+          {/* LEFT SIDE: LOGO */}
           <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveScreen('feed')}>
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveScreen('feed'); setIsMobileMenuOpen(false); }}>
               <ShareMealLogo isDonor={isDonor} className="h-8 w-8" />
-              {/* <span className="text-xl font-extrabold tracking-tight">ShareMeal</span> */}
               <span className="hidden sm:block text-xl font-extrabold tracking-tight">ShareMeal</span>
             </div>
             <div className="hidden sm:block"><LiveLocationBadge isDonor={isDonor} /></div>
           </div>
-          <div className="flex items-center gap-6">
+
+          {/* MOBILE ONLY: CENTERED DONATE FOOD BUTTON */}
+          {user.role === 'donor' && (
+            <button 
+              onClick={() => { setActiveScreen('create'); setIsMobileMenuOpen(false); }} 
+              className={`sm:hidden text-xs font-bold flex items-center gap-1 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white px-3 py-2 rounded-xl shadow-sm absolute left-1/2 transform -translate-x-1/2 cursor-pointer transition-all ${activeScreen === 'create' ? 'ring-2 ring-emerald-400' : ''}`}
+            >
+              <Plus size={14} /> <span>Donate Food</span>
+            </button>
+          )}
+
+          {/* DESKTOP ACTIONS: AUTO HIDDEN ON MOBILE */}
+          <div className="hidden sm:flex items-center gap-6">
             <button onClick={() => setActiveScreen('feed')} className={`text-sm font-bold flex items-center gap-1.5 cursor-pointer transition-all ${activeScreen === 'feed' ? `${theme.primaryText} border-b-2 ${theme.accentBorder} pb-1` : 'text-gray-400 hover:text-gray-600'}`}><Compass size={16} /> <span>Find Food</span></button>
             {user.role === 'donor' && <button onClick={() => setActiveScreen('create')} className={`text-sm font-bold flex items-center gap-1.5 cursor-pointer transition-all ${activeScreen === 'create' ? `${theme.primaryText} border-b-2 ${theme.accentBorder} pb-1` : 'text-gray-400 hover:text-gray-600'}`}><Plus size={16} /> <span>Donate Food</span></button>}
             
-            <div className="h-5 w-[1px] bg-gray-200 hidden sm:block" />
+            <div className="h-5 w-[1px] bg-gray-200" />
 
-            {/* <div className="relative bg-[#EBEDEA] p-1 rounded-xl hidden sm:flex items-center border border-gray-200/50 w-44 h-10 shadow-inner"> */}
             <div className="relative bg-[#EBEDEA] p-1 rounded-xl flex items-center border border-gray-200/50 w-44 h-10 shadow-inner">
               <div className={`absolute top-1 bottom-1 left-1 rounded-lg transition-all duration-300 shadow-sm ${isDonor ? 'w-[82px] translate-x-0 bg-[#0B3529]' : 'w-[82px] translate-x-[80px] bg-[#2E0854]'}`} />
               <button onClick={() => toggleRole('donor')} className={`z-10 flex-1 flex items-center justify-center gap-1 h-full text-xs font-bold cursor-pointer transition-colors ${isDonor ? 'text-[#D4AF37]' : 'text-gray-500'}`}><Building size={12} /> Donor</button>
@@ -447,9 +459,75 @@ export default function App() {
             <button onClick={() => setActiveScreen('account')} className={`cursor-pointer transform hover:scale-105 active:scale-95 transition-all ${activeScreen === 'account' ? theme.primaryText : 'text-gray-400'}`}><UserCircle size={22} /></button>
             <button onClick={() => { localStorage.clear(); setUser(null); setToken(null); }} className="text-gray-400 hover:text-rose-600 cursor-pointer"><LogOut size={16} /></button>
           </div>
-        </div>
-      </nav>
 
+          {/* MOBILE ONLY: 3-LINE MENU TOGGLE BUTTON */}
+          <div className="sm:hidden flex items-center">
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+              className="text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer p-1 transition-transform active:scale-90"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+        </div>
+
+        {/* MOBILE DROPDOWN MODAL SLIDE */}
+        {isMobileMenuOpen && (
+          <div className="sm:hidden absolute top-20 left-0 right-0 bg-white border-b border-gray-200 shadow-xl p-5 flex flex-col gap-4 z-40 animate-[fadeIn_0.2s_ease-out]">
+            {/* Find Food Option */}
+            <button 
+              onClick={() => { setActiveScreen('feed'); setIsMobileMenuOpen(false); }} 
+              className={`w-full py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${activeScreen === 'feed' ? `${theme.lightBg} ${theme.primaryText}` : 'text-gray-600 hover:bg-gray-50'}`}
+            >
+              <Compass size={18} /> <span>Find Food</span>
+            </button>
+
+            {/* Mobile Switch Role Toggle Box */}
+            <div className="relative bg-[#EBEDEA] p-1 rounded-xl flex items-center border border-gray-200/50 w-full h-12 shadow-inner mt-1">
+              <div 
+                className="absolute top-1 bottom-1 rounded-lg transition-all duration-300 shadow-sm"
+                style={{
+                  width: 'calc(50% - 6px)',
+                  left: isDonor ? '4px' : 'calc(50% + 2px)',
+                  backgroundColor: isDonor ? '#0B3529' : '#2E0854'
+                }}
+              />
+              <button 
+                onClick={() => { toggleRole('donor'); }} 
+                className={`z-10 flex-1 flex items-center justify-center gap-1.5 h-full text-xs font-extrabold cursor-pointer transition-colors ${isDonor ? 'text-[#D4AF37]' : 'text-gray-500'}`}
+              >
+                <Building size={14} /> Donor
+              </button>
+              <button 
+                onClick={() => { toggleRole('volunteer'); }} 
+                className={`z-10 flex-1 flex items-center justify-center gap-1.5 h-full text-xs font-extrabold cursor-pointer transition-colors ${!isDonor ? 'text-[#FF6B35]' : 'text-gray-500'}`}
+              >
+                <User size={14} /> Rescue
+              </button>
+            </div>
+
+            <div className="h-[1px] bg-gray-100 my-1" />
+
+            {/* Account Center & Logout Controls Wrapper */}
+            <div className="flex items-center justify-between gap-3">
+              <button 
+                onClick={() => { setActiveScreen('account'); setIsMobileMenuOpen(false); }} 
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 border border-gray-200 transition-all ${activeScreen === 'account' ? `${theme.lightBg} ${theme.primaryText} border-transparent` : 'text-gray-600 bg-white hover:bg-gray-50'}`}
+              >
+                <UserCircle size={18} /> <span>Account Center</span>
+              </button>
+              
+              <button 
+                onClick={() => { localStorage.clear(); setUser(null); setToken(null); setIsMobileMenuOpen(false); }} 
+                className="p-3 bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-100 rounded-xl cursor-pointer flex items-center justify-center transition-colors"
+                title="Log Out"
+              >
+                <LogOut size={18} />
+              </button>
+            </div>
+          </div>
+        )}
+      </nav>
       {/* STREAM MONITOR HEADER */}
       {activeScreen === 'feed' && (
         <header className={`relative w-full py-16 px-6 border-b border-gray-100 overflow-hidden bg-gradient-to-b ${theme.heroGradient} shrink-0`}>
