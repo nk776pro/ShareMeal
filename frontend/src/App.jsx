@@ -861,10 +861,23 @@ function LiveLocationBadge({ isDonor = true }) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`);
+            // 🌟 CHANGED: Using Google Maps Geocoding API instead of OpenStreetMap
+            const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+            const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${GOOGLE_API_KEY}`);
             const data = await res.json();
-            setLocationName(data.address.suburb || data.address.city || data.address.state_district || "Chennai Area");
-          } catch (error) { setLocationName("Chennai Central"); }
+            
+            if (data.results && data.results.length > 0) {
+              // Google returns a complex array. We look for the "locality" (city) or "sublocality" (neighborhood)
+              const addressComponents = data.results[0].address_components;
+              const localArea = addressComponents.find(c => c.types.includes("sublocality") || c.types.includes("locality"));
+              
+              setLocationName(localArea ? localArea.long_name : "Local Area");
+            } else {
+              setLocationName("Location Unknown");
+            }
+          } catch (error) { 
+            setLocationName("Chennai Central"); // Fallback if network fails
+          }
         },
         () => { setHasError(true); setLocationName("Location Denied"); }
       );
