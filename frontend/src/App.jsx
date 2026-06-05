@@ -856,34 +856,62 @@ function LiveLocationBadge({ isDonor = true }) {
   const [hasError, setHasError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
+  // useEffect(() => {
+  //   if ("geolocation" in navigator) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       async (position) => {
+  //         try {
+  //           // 🌟 CHANGED: Using Google Maps Geocoding API instead of OpenStreetMap
+  //           const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  //           const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${GOOGLE_API_KEY}`);
+  //           const data = await res.json();
+            
+  //           if (data.results && data.results.length > 0) {
+  //             // Google returns a complex array. We look for the "locality" (city) or "sublocality" (neighborhood)
+  //             const addressComponents = data.results[0].address_components;
+  //             const localArea = addressComponents.find(c => c.types.includes("sublocality") || c.types.includes("locality"));
+              
+  //             setLocationName(localArea ? localArea.long_name : "Local Area");
+  //           } else {
+  //             setLocationName("Location Unknown");
+  //           }
+  //         } catch (error) { 
+  //           setLocationName("Chennai Central"); // Fallback if network fails
+  //         }
+  //       },
+  //       () => { setHasError(true); setLocationName("Location Denied"); }
+  //     );
+  //   } else { setLocationName("GPS Unsupported"); }
+  // }, []);
+
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
-            // 🌟 CHANGED: Using Google Maps Geocoding API instead of OpenStreetMap
             const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
             const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${GOOGLE_API_KEY}`);
             const data = await res.json();
             
+            // 🚨 THIS WILL TELL US THE PROBLEM:
+            console.log("GOOGLE API RESPONSE:", data); 
+
             if (data.results && data.results.length > 0) {
-              // Google returns a complex array. We look for the "locality" (city) or "sublocality" (neighborhood)
               const addressComponents = data.results[0].address_components;
               const localArea = addressComponents.find(c => c.types.includes("sublocality") || c.types.includes("locality"));
-              
               setLocationName(localArea ? localArea.long_name : "Local Area");
             } else {
               setLocationName("Location Unknown");
             }
           } catch (error) { 
-            setLocationName("Chennai Central"); // Fallback if network fails
+            console.error("Fetch failed:", error);
+            setLocationName("Chennai Central"); 
           }
         },
-        () => { setHasError(true); setLocationName("Location Denied"); }
+        (err) => { console.error("GPS Error", err); setHasError(true); setLocationName("Location Denied"); }
       );
     } else { setLocationName("GPS Unsupported"); }
   }, []);
-
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') setIsEditing(false);
   };
