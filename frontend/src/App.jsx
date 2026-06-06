@@ -565,7 +565,7 @@ const handleAuth = async (e) => {
           <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 z-50 shadow-sm shrink-0">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between relative">
           
-// Logo & Location for Mobile (fixed)
+          {/*Logo & Location for Mobile (fixed)*/}
           <div className="flex items-center gap-3 sm:gap-8">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveScreen('feed'); setIsMobileMenuOpen(false); }}>
               <ShareMealLogo isDonor={isDonor} className="h-8 w-8" />
@@ -583,7 +583,7 @@ const handleAuth = async (e) => {
             </button>
           )}*/}
 
-// Hamburger option for movile
+          {/* Hamburger option for movile*/}
           <div className="sm:hidden flex items-center gap-3">
             {user?.role === 'donor' && (
               <button onClick={() => { setActiveScreen('create'); setIsMobileMenuOpen(false); }} className={`flex items-center justify-center h-9 w-9 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl shadow-sm cursor-pointer transition-all ${activeScreen === 'create' ? 'ring-2 ring-emerald-400' : ''}`} title="Donate Food"><Plus size={20} /></button>)}
@@ -592,7 +592,7 @@ const handleAuth = async (e) => {
             </button>
           </div>
 
-// PC elements that are hidden in mobile
+          {/*PC elements that are hidden in mobile*/}
           <div className="hidden sm:flex items-center gap-6">
             <button onClick={() => setActiveScreen('feed')} className={`text-sm font-bold flex items-center gap-1.5 cursor-pointer transition-all ${activeScreen === 'feed' ? `${theme.primaryText} border-b-2 ${theme.accentBorder} pb-1` : 'text-gray-400 hover:text-gray-600'}`}><Compass size={16} /> <span>Find Food</span></button>
             {user?.role === 'donor' && <button onClick={() => setActiveScreen('create')} className={`text-sm font-bold flex items-center gap-1.5 cursor-pointer transition-all ${activeScreen === 'create' ? `${theme.primaryText} border-b-2 ${theme.accentBorder} pb-1` : 'text-gray-400 hover:text-gray-600'}`}><Plus size={18} /> <span className="hidden sm:block">Donate Food</span></button>}
@@ -616,7 +616,7 @@ const handleAuth = async (e) => {
           </div>*/}
         </div>
 
-// Dropdown for moble
+            {/* Dropdown for moble*/}
             {isMobileMenuOpen && (
           <div className="sm:hidden absolute top-20 left-0 right-0 bg-white border-b border-gray-200 shadow-xl p-5 flex flex-col gap-4 z-40 animate-[fadeIn_0.2s_ease-out]">
             <button 
@@ -679,7 +679,7 @@ const handleAuth = async (e) => {
           </div>
         </header>
       )}
-      // Filter
+      {/*Filter*/}
       {activeScreen === 'feed' && (
         <section className="max-w-6xl mx-auto w-full px-6 pt-8 shrink-0">
           <div className="flex gap-3 overflow-x-auto whitespace-nowrap pb-2 scrollbar-none">
@@ -691,7 +691,7 @@ const handleAuth = async (e) => {
           </div>
         </section>
       )}
-      // Layout
+      {/*Layout*/}
       <main className="flex-grow w-full max-w-6xl mx-auto px-6 pt-6 pb-20">
                 {activeScreen === 'feed' && (
           <div className="space-y-6">
@@ -885,7 +885,7 @@ const handleAuth = async (e) => {
           </div>
         )}
       </main>
-// Footer
+      {/*Footer*/}
       <footer className={`w-full mt-auto py-10 border-t ${theme.footerBg} ${theme.footerBorder} shrink-0`}>
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-xs font-semibold text-white/50 text-center md:text-left gap-3">
           <span>&copy; 2026 ShareMeal Platform</span>
@@ -893,7 +893,7 @@ const handleAuth = async (e) => {
         </div>
       </footer>
 
-      // T&C
+      {/* T&C*/}
       <SuccessModal isOpen={isModalOpen} onClose={() => { setModalOpen(false); setActiveScreen('feed'); }} />
       <LegalModal isOpen={!!legalModalType} type={legalModalType} onClose={() => setLegalModalType(null)} />
     </div>
