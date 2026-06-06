@@ -1076,10 +1076,10 @@ export default function App() {
   
   // Auth Form State (UPDATED FOR OTP)
   const [authMode, setAuthMode] = useState('login'); 
-  const [authStep, setAuthStep] = useState(1);
+  //const [authStep, setAuthStep] = useState(1);
   const [authForm, setAuthForm] = useState({ name: '', mobile: '', password: '', role: 'volunteer', otp: '' });
   const [authError, setAuthError] = useState('');
-  const [demoOtp, setDemoOtp] = useState(''); // Holds Intercepted Sandbox Payload Telemetry Safely
+  //const [demoOtp, setDemoOtp] = useState(''); // Holds Intercepted Sandbox Payload Telemetry Safely
 
   // Active UI Navigation States
   const [activeScreen, setActiveScreen] = useState('feed'); 
@@ -1145,34 +1145,59 @@ export default function App() {
   }, [user]);
 
   // UPDATED AUTHENTICATION HANDLER
-  const handleAuth = async (e) => {
+  // const handleAuth = async (e) => {
+  //   e.preventDefault();
+  //   setAuthError('');
+    
+  //   // STEP 1: Request OTP
+  //   if (authStep === 1) {
+  //     setIsSubmitting(true);
+  //     try {
+  //       const res = await fetch(`${BACKEND_URL}/auth/request-otp`, {
+  //         method: 'POST',
+  //         headers: { 'Content-Type': 'application/json' },
+  //         body: JSON.stringify({ mobile: authForm.mobile })
+  //       });
+  //       const data = await res.json();
+  //       if (data.error) { 
+  //         setAuthError(data.error); 
+  //       } else { 
+  //         setDemoOtp(data.demoOtp || ''); // Capture security token response
+  //         setAuthStep(2); // Move to OTP entry screen
+  //       }
+  //     } catch (err) { setAuthError('Failed to request OTP. Check connection.'); }
+  //     finally { setIsSubmitting(false); }
+  //     return;
+  //   }
+
+  //   // STEP 2: Verify OTP and Login/Register
+  //   try {
+  //     setIsSubmitting(true);
+  //     const res = await fetch(`${BACKEND_URL}/auth/${authMode}`, {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify(authForm)
+  //     });
+  //     const data = await res.json();
+  //     if (data.error) { setAuthError(data.error); return; }
+      
+  //     localStorage.setItem('sharemeal_token', data.token);
+  //     localStorage.setItem('sharemeal_user', JSON.stringify(data.user));
+  //     setToken(data.token);
+  //     setUser(data.user);
+  //     setActiveScreen('feed');
+  //     setAuthStep(1); // Reset for future logouts
+  //     setDemoOtp(''); // Reset trace matrix
+  //   } catch (err) { setAuthError('Connection error. Please try again.'); }
+  //   finally { setIsSubmitting(false); }
+  // };
+
+const handleAuth = async (e) => {
     e.preventDefault();
     setAuthError('');
+    setIsSubmitting(true);
     
-    // STEP 1: Request OTP
-    if (authStep === 1) {
-      setIsSubmitting(true);
-      try {
-        const res = await fetch(`${BACKEND_URL}/auth/request-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mobile: authForm.mobile })
-        });
-        const data = await res.json();
-        if (data.error) { 
-          setAuthError(data.error); 
-        } else { 
-          setDemoOtp(data.demoOtp || ''); // Capture security token response
-          setAuthStep(2); // Move to OTP entry screen
-        }
-      } catch (err) { setAuthError('Failed to request OTP. Check connection.'); }
-      finally { setIsSubmitting(false); }
-      return;
-    }
-
-    // STEP 2: Verify OTP and Login/Register
     try {
-      setIsSubmitting(true);
       const res = await fetch(`${BACKEND_URL}/auth/${authMode}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1186,12 +1211,13 @@ export default function App() {
       setToken(data.token);
       setUser(data.user);
       setActiveScreen('feed');
-      setAuthStep(1); // Reset for future logouts
-      setDemoOtp(''); // Reset trace matrix
-    } catch (err) { setAuthError('Connection error. Please try again.'); }
-    finally { setIsSubmitting(false); }
+    } catch (err) { 
+      setAuthError('Connection error. Please try again.'); 
+    } finally { 
+      setIsSubmitting(false); 
+    }
   };
-
+  
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
@@ -1350,17 +1376,84 @@ export default function App() {
   const totalSavedPlatesCount = userListings.filter(l => l.status === 'completed').reduce((sum, item) => sum + (item.totalServings || 0), 0);
 
   // UPDATED AUTHENTICATION RENDER
+  // if (!user) {
+  //   return (
+  //     <div className="min-h-screen bg-[#F3F5F4] flex flex-col items-center justify-center p-4 tracking-tight">
+  //       <div className="w-full max-w-sm bg-white p-8 rounded-3xl shadow-sm border border-gray-100 relative">
+          
+  //         {authStep === 2 && (
+  //           <button onClick={() => setAuthStep(1)} className="absolute top-6 left-6 text-gray-400 hover:text-gray-700 text-sm font-bold flex items-center gap-1 cursor-pointer">
+  //             ← Back
+  //           </button>
+  //         )}
+
+  //         <ShareMealLogo isDonor={true} className="h-12 w-12 mx-auto mb-3 mt-4" />
+  //         <h1 className="text-2xl font-bold text-[#0B3529] tracking-tight text-center">Welcome to ShareMeal</h1>
+  //         <p className="text-sm text-emerald-800/70 mt-1 font-medium text-center mb-6">Connecting surplus food with those in need</p>
+
+  //         {authError && <div className="mb-4 p-3 bg-rose-50 text-rose-700 text-sm font-semibold rounded-xl text-center border border-rose-100">{authError}</div>}
+
+  //         <form onSubmit={handleAuth} className="space-y-4">
+  //           {authStep === 1 ? (
+  //             <>
+  //               {authMode === 'register' && <input type="text" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Your Name / Organization" value={authForm.name} onChange={e => setAuthForm({...authForm, name: e.target.value})} />}
+  //               <input type="tel" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Mobile Number" value={authForm.mobile} onChange={e => setAuthForm({...authForm, mobile: e.target.value})} />
+  //               <input type="password" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Password" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} />
+
+  //               {authMode === 'register' && (
+  //                 <div className="grid grid-cols-2 gap-2 p-1.5 bg-[#F3F5F4] rounded-xl border border-gray-200/50">
+  //                   <button type="button" onClick={() => setAuthForm({...authForm, role: 'volunteer'})} className={`py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${authForm.role === 'volunteer' ? 'bg-white text-[#0B3529] shadow-sm' : 'text-gray-500'}`}>NGO / Rescue</button>
+  //                   <button type="button" onClick={() => setAuthForm({...authForm, role: 'donor'})} className={`py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${authForm.role === 'donor' ? 'bg-white text-[#0B3529] shadow-sm' : 'text-gray-500'}`}>Food Donor</button>
+  //                 </div>
+  //               )}
+  //             </>
+  //           ) : (
+  //             <div className="animate-[fadeIn_0.3s_ease-out]">
+  //               <div className="p-3 bg-emerald-50/50 text-emerald-800 text-xs font-semibold rounded-xl border border-emerald-100 mb-4 text-center">
+  //                 Secure OTP sent to <br/><span className="text-sm font-black">{authForm.mobile}</span>
+  //               </div>
+
+  //               {/* DYNAMIC SANDBOX DLT REGULATORY SIMULATION COMPONENT */}
+  //               {demoOtp && (
+  //                 <div className="mb-4 bg-[#f0fdf4] border border-dashed border-[#22c55e] rounded-xl p-4 text-center shadow-sm">
+  //                   <p className="m-0 text-[11px] text-[#166534] font-black uppercase tracking-wider flex justify-center items-center gap-1.5">
+  //                     🛠️ Sandbox Simulation Active
+  //                   </p>
+  //                   <p className="mt-1 text-xs font-medium text-[#15803d]">
+  //                     Intercepted DB Security Token:
+  //                   </p>
+  //                   <div className="mt-2 text-3xl font-black text-[#166534] tracking-[0.2em] pl-[0.2em]">
+  //                     {demoOtp}
+  //                   </div>
+  //                 </div>
+  //               )}
+
+  //               <input type="text" maxLength="6" required className="w-full text-center tracking-[0.5em] text-2xl px-4 py-4 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-bold text-[#0B3529] outline-none" placeholder="••••••" value={authForm.otp} onChange={e => setAuthForm({...authForm, otp: e.target.value})} />
+  //             </div>
+  //           )}
+            
+  //           <button type="submit" disabled={isSubmitting} className={`w-full py-3.5 bg-[#0B3529] text-[#D4AF37] font-bold text-sm rounded-xl hover:opacity-95 shadow-md transition-all cursor-pointer ${isSubmitting ? 'opacity-70' : 'hover:opacity-95'}`}>
+  //             {authStep === 1 ? 'Request Secure OTP' : (authMode === 'login' ? 'Verify & Log In' : 'Verify & Create Account')}
+  //           </button>
+  //         </form>
+          
+  //         {authStep === 1 && (
+  //           <div className="mt-6 text-center">
+  //             <button onClick={() => { setAuthMode(authMode === 'login' ? 'register' : 'login'); setAuthError(''); }} className="text-sm font-semibold text-[#125441] hover:text-[#0B3529] cursor-pointer">
+  //               {authMode === 'login' ? "Need an account? Sign up" : "Already have an account? Log in"}
+  //             </button>
+  //           </div>
+  //         )}
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
   if (!user) {
     return (
       <div className="min-h-screen bg-[#F3F5F4] flex flex-col items-center justify-center p-4 tracking-tight">
         <div className="w-full max-w-sm bg-white p-8 rounded-3xl shadow-sm border border-gray-100 relative">
           
-          {authStep === 2 && (
-            <button onClick={() => setAuthStep(1)} className="absolute top-6 left-6 text-gray-400 hover:text-gray-700 text-sm font-bold flex items-center gap-1 cursor-pointer">
-              ← Back
-            </button>
-          )}
-
           <ShareMealLogo isDonor={true} className="h-12 w-12 mx-auto mb-3 mt-4" />
           <h1 className="text-2xl font-bold text-[#0B3529] tracking-tight text-center">Welcome to ShareMeal</h1>
           <p className="text-sm text-emerald-800/70 mt-1 font-medium text-center mb-6">Connecting surplus food with those in need</p>
@@ -1368,76 +1461,57 @@ export default function App() {
           {authError && <div className="mb-4 p-3 bg-rose-50 text-rose-700 text-sm font-semibold rounded-xl text-center border border-rose-100">{authError}</div>}
 
           <form onSubmit={handleAuth} className="space-y-4">
-            {authStep === 1 ? (
-              <>
-                {authMode === 'register' && <input type="text" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Your Name / Organization" value={authForm.name} onChange={e => setAuthForm({...authForm, name: e.target.value})} />}
-                <input type="tel" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Mobile Number" value={authForm.mobile} onChange={e => setAuthForm({...authForm, mobile: e.target.value})} />
-                <input type="password" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Password" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} />
+            {authMode === 'register' && (
+              <input type="text" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Your Name / Organization" value={authForm.name} onChange={e => setAuthForm({...authForm, name: e.target.value})} />
+            )}
+            
+            <input type="tel" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Mobile Number" value={authForm.mobile} onChange={e => setAuthForm({...authForm, mobile: e.target.value})} />
+            
+            <input type="password" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Password" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} />
 
-                {authMode === 'register' && (
-                  <div className="grid grid-cols-2 gap-2 p-1.5 bg-[#F3F5F4] rounded-xl border border-gray-200/50">
-                    <button type="button" onClick={() => setAuthForm({...authForm, role: 'volunteer'})} className={`py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${authForm.role === 'volunteer' ? 'bg-white text-[#0B3529] shadow-sm' : 'text-gray-500'}`}>NGO / Rescue</button>
-                    <button type="button" onClick={() => setAuthForm({...authForm, role: 'donor'})} className={`py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${authForm.role === 'donor' ? 'bg-white text-[#0B3529] shadow-sm' : 'text-gray-500'}`}>Food Donor</button>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="animate-[fadeIn_0.3s_ease-out]">
-                <div className="p-3 bg-emerald-50/50 text-emerald-800 text-xs font-semibold rounded-xl border border-emerald-100 mb-4 text-center">
-                  Secure OTP sent to <br/><span className="text-sm font-black">{authForm.mobile}</span>
-                </div>
-
-                {/* DYNAMIC SANDBOX DLT REGULATORY SIMULATION COMPONENT */}
-                {demoOtp && (
-                  <div className="mb-4 bg-[#f0fdf4] border border-dashed border-[#22c55e] rounded-xl p-4 text-center shadow-sm">
-                    <p className="m-0 text-[11px] text-[#166534] font-black uppercase tracking-wider flex justify-center items-center gap-1.5">
-                      🛠️ Sandbox Simulation Active
-                    </p>
-                    <p className="mt-1 text-xs font-medium text-[#15803d]">
-                      Intercepted DB Security Token:
-                    </p>
-                    <div className="mt-2 text-3xl font-black text-[#166534] tracking-[0.2em] pl-[0.2em]">
-                      {demoOtp}
-                    </div>
-                  </div>
-                )}
-
-                <input type="text" maxLength="6" required className="w-full text-center tracking-[0.5em] text-2xl px-4 py-4 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-bold text-[#0B3529] outline-none" placeholder="••••••" value={authForm.otp} onChange={e => setAuthForm({...authForm, otp: e.target.value})} />
+            {authMode === 'register' && (
+              <div className="grid grid-cols-2 gap-2 p-1.5 bg-[#F3F5F4] rounded-xl border border-gray-200/50">
+                <button type="button" onClick={() => setAuthForm({...authForm, role: 'volunteer'})} className={`py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${authForm.role === 'volunteer' ? 'bg-white text-[#0B3529] shadow-sm' : 'text-gray-500'}`}>NGO / Rescue</button>
+                <button type="button" onClick={() => setAuthForm({...authForm, role: 'donor'})} className={`py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${authForm.role === 'donor' ? 'bg-white text-[#0B3529] shadow-sm' : 'text-gray-500'}`}>Food Donor</button>
               </div>
             )}
             
             <button type="submit" disabled={isSubmitting} className={`w-full py-3.5 bg-[#0B3529] text-[#D4AF37] font-bold text-sm rounded-xl hover:opacity-95 shadow-md transition-all cursor-pointer ${isSubmitting ? 'opacity-70' : 'hover:opacity-95'}`}>
-              {authStep === 1 ? 'Request Secure OTP' : (authMode === 'login' ? 'Verify & Log In' : 'Verify & Create Account')}
+              {authMode === 'login' ? 'Log In' : 'Create Account'}
             </button>
           </form>
           
-          {authStep === 1 && (
-            <div className="mt-6 text-center">
-              <button onClick={() => { setAuthMode(authMode === 'login' ? 'register' : 'login'); setAuthError(''); }} className="text-sm font-semibold text-[#125441] hover:text-[#0B3529] cursor-pointer">
-                {authMode === 'login' ? "Need an account? Sign up" : "Already have an account? Log in"}
-              </button>
-            </div>
-          )}
+          <div className="mt-6 text-center">
+            <button onClick={() => { setAuthMode(authMode === 'login' ? 'register' : 'login'); setAuthError(''); }} className="text-sm font-semibold text-[#125441] hover:text-[#0B3529] cursor-pointer">
+              {authMode === 'login' ? "Need an account? Sign up" : "Already have an account? Log in"}
+            </button>
+          </div>
         </div>
       </div>
     );
   }
+  
 
   return (
     <div className={`flex flex-col min-h-screen bg-[#FAFAFA] ${theme.primaryText} font-sans antialiased tracking-tight transition-all duration-300 ease-out ${isTransitioning ? 'opacity-30 scale-[0.99] filter blur-sm' : 'opacity-100 scale-100'}`}>
       
       {/* GLOBAL NAVBAR */}
+  {/* GLOBAL NAVBAR */}
       <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 z-50 shadow-sm shrink-0">
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between relative">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between relative">
           
-          {/* LEFT SIDE: LOGO */}
-          <div className="flex items-center gap-8">
+          {/* LEFT SIDE: LOGO & LOCATION (Fixed for Mobile) */}
+          <div className="flex items-center gap-3 sm:gap-8">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveScreen('feed'); setIsMobileMenuOpen(false); }}>
               <ShareMealLogo isDonor={isDonor} className="h-8 w-8" />
               <span className="hidden sm:block text-xl font-extrabold tracking-tight">ShareMeal</span>
             </div>
-            <div className="hidden sm:block"><LiveLocationBadge isDonor={isDonor} /></div>
+            
+            {/* Removed 'hidden sm:block' so it renders on mobile */}
+            <div><LiveLocationBadge isDonor={isDonor} /></div>
           </div>
+
+          {/* ... [Rest of your Navbar code] ... */}
 
           {/* MOBILE ONLY: CENTERED DONATE FOOD BUTTON */}
           {user?.role === 'donor' && (
