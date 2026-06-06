@@ -663,16 +663,13 @@ const handleAuth = async (e) => {
       
       
 // {/* GLOBAL NAVBAR */}
-//       <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 z-50 shadow-sm shrink-0">
-//         {/* Adjusted padding and height for mobile */}
+//   {/*    <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 z-50 shadow-sm shrink-0">
+//         
 //         <div className="max-w-6xl mx-auto px-3 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2">
           
-//           {/* LEFT SIDE: LOGO & LOCATION */}
-//           {/* Added min-w-0 so the location text can truncate instead of pushing other items */}
-//           <div className="flex items-center gap-2 sm:gap-6 min-w-0 flex-1">
+//                     <div className="flex items-center gap-2 sm:gap-6 min-w-0 flex-1">
 //             <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={() => { setActiveScreen('feed'); setIsMobileMenuOpen(false); }}>
 //               <ShareMealLogo isDonor={isDonor} className="h-7 w-7 sm:h-8 sm:w-8" />
-//               {/* Hide "ShareMeal" text on small screens, show on lg screens */}
 //               <span className="hidden lg:block text-xl font-extrabold tracking-tight">ShareMeal</span>
 //             </div>
             
@@ -681,8 +678,7 @@ const handleAuth = async (e) => {
 //             </div>
 //           </div>
 
-//           {/* RIGHT SIDE: PROFILE & ACTIONS */}
-//           <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+//           <div className="flex items-center gap-2 sm:gap-4 shrink-0"> 
             
 //             {/* DONATE FOOD / POST BUTTON */}
 //             {isDonor ? (
