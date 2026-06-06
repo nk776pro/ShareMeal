@@ -1,4 +1,4 @@
-// import ShareMealLogo from './ShareMealLogo';
+cacan// import ShareMealLogo from './ShareMealLogo';
 // import { useState, useEffect } from 'react';
 // import { 
 //   MapPin, PhoneCall, Send, LogOut, Compass, 
@@ -1566,7 +1566,7 @@ const handleAuth = async (e) => {
             </div>
             
             {/* Removed 'hidden sm:block' so it renders on mobile */}
-            <div><LiveLocationBadge isDonor={isDonor} /></div>
+            <div className="block"><LiveLocationBadge isDonor={isDonor} /></div>
           </div>
 
           {/* ... [Rest of your Navbar code] ... */}
@@ -1584,7 +1584,7 @@ const handleAuth = async (e) => {
           {/* DESKTOP ACTIONS: AUTO HIDDEN ON MOBILE */}
           <div className="hidden sm:flex items-center gap-6">
             <button onClick={() => setActiveScreen('feed')} className={`text-sm font-bold flex items-center gap-1.5 cursor-pointer transition-all ${activeScreen === 'feed' ? `${theme.primaryText} border-b-2 ${theme.accentBorder} pb-1` : 'text-gray-400 hover:text-gray-600'}`}><Compass size={16} /> <span>Find Food</span></button>
-            {user?.role === 'donor' && <button onClick={() => setActiveScreen('create')} className={`text-sm font-bold flex items-center gap-1.5 cursor-pointer transition-all ${activeScreen === 'create' ? `${theme.primaryText} border-b-2 ${theme.accentBorder} pb-1` : 'text-gray-400 hover:text-gray-600'}`}><Plus size={16} /> <span>Donate Food</span></button>}
+            {user?.role === 'donor' && <button onClick={() => setActiveScreen('create')} className={`text-sm font-bold flex items-center gap-1.5 cursor-pointer transition-all ${activeScreen === 'create' ? `${theme.primaryText} border-b-2 ${theme.accentBorder} pb-1` : 'text-gray-400 hover:text-gray-600'}`}><Plus size={18} /> <span className="hidden sm:block">Donate Food</span></button>}
             
             <div className="h-5 w-[1px] bg-gray-200" />
 
