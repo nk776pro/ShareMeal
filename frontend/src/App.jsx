@@ -13,34 +13,7 @@ function LiveLocationBadge({ isDonor = true }) {
   const [hasError, setHasError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  // useEffect(() => {
-  //   if ("geolocation" in navigator) {
-  //     navigator.geolocation.getCurrentPosition(
-  //       async (position) => {
-  //         try {
-  //           // 🌟 CHANGED: Using Google Maps Geocoding API instead of OpenStreetMap
-  //           const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  //           const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${GOOGLE_API_KEY}`);
-  //           const data = await res.json();
-            
-  //           if (data.results && data.results.length > 0) {
-  //             // Google returns a complex array. We look for the "locality" (city) or "sublocality" (neighborhood)
-  //             const addressComponents = data.results[0].address_components;
-  //             const localArea = addressComponents.find(c => c.types.includes("sublocality") || c.types.includes("locality"));
-              
-  //             setLocationName(localArea ? localArea.long_name : "Local Area");
-  //           } else {
-  //             setLocationName("Location Unknown");
-  //           }
-  //         } catch (error) { 
-  //           setLocationName("Chennai Central"); // Fallback if network fails
-  //         }
-  //       },
-  //       () => { setHasError(true); setLocationName("Location Denied"); }
-  //     );
-  //   } else { setLocationName("GPS Unsupported"); }
-  // }, []);
-
+  // Using Google Map API
   // useEffect(() => {
   //   if ("geolocation" in navigator) {
   //     navigator.geolocation.getCurrentPosition(
@@ -49,10 +22,7 @@ function LiveLocationBadge({ isDonor = true }) {
   //           const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   //           const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${GOOGLE_API_KEY}`);
   //           const data = await res.json();
-            
-  //           // 🚨 THIS WILL TELL US THE PROBLEM:
   //           console.log("GOOGLE API RESPONSE:", data); 
-
   //           if (data.results && data.results.length > 0) {
   //             const addressComponents = data.results[0].address_components;
   //             const localArea = addressComponents.find(c => c.types.includes("sublocality") || c.types.includes("locality"));
@@ -69,23 +39,19 @@ function LiveLocationBadge({ isDonor = true }) {
   //     );
   //   } else { setLocationName("GPS Unsupported"); }
   // }, []);
+
+
+  // Using OpenStreetMap
 // useEffect(() => {
 //     if ("geolocation" in navigator) {
 //       navigator.geolocation.getCurrentPosition(
 //         async (position) => {
 //           try {
-//             // Free OpenStreetMap API
 //             const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`);
 //             const data = await res.json();
-            
-//             // 🌟 THE PINPOINT FIX: Instead of looking for broken tags, extract the exact local area text
 //             if (data.display_name) {
 //               const addressParts = data.display_name.split(',');
-              
-//               // This grabs the first two specific details (e.g., "Street Name, Neighborhood") 
-//               // instead of the broad state/country names at the end.
 //               const pinpointLocation = addressParts.slice(0, 2).join(', ').trim();
-              
 //               setLocationName(pinpointLocation);
 //             } else {
 //               // Fallback if the full text fails
@@ -294,7 +260,7 @@ export default function App() {
   //       if (data.error) { 
   //         setAuthError(data.error); 
   //       } else { 
-  //         setDemoOtp(data.demoOtp || ''); // Capture security token response
+  //         setDemoOtp(data.demoOtp || ''); 
   //         setAuthStep(2); // Move to OTP entry screen
   //       }
   //     } catch (err) { setAuthError('Failed to request OTP. Check connection.'); }
@@ -487,30 +453,26 @@ const handleAuth = async (e) => {
   const archivedRunsCount = userListings.filter(l => l.status === 'completed').length;
   const totalSavedPlatesCount = userListings.filter(l => l.status === 'completed').reduce((sum, item) => sum + (item.totalServings || 0), 0);
 
+  // Code for OTP verifiation
   // if (!user) {
   //   return (
   //     <div className="min-h-screen bg-[#F3F5F4] flex flex-col items-center justify-center p-4 tracking-tight">
-  //       <div className="w-full max-w-sm bg-white p-8 rounded-3xl shadow-sm border border-gray-100 relative">
-          
+  //       <div className="w-full max-w-sm bg-white p-8 rounded-3xl shadow-sm border border-gray-100 relative">       
   //         {authStep === 2 && (
   //           <button onClick={() => setAuthStep(1)} className="absolute top-6 left-6 text-gray-400 hover:text-gray-700 text-sm font-bold flex items-center gap-1 cursor-pointer">
   //             ← Back
   //           </button>
   //         )}
-
   //         <ShareMealLogo isDonor={true} className="h-12 w-12 mx-auto mb-3 mt-4" />
   //         <h1 className="text-2xl font-bold text-[#0B3529] tracking-tight text-center">Welcome to ShareMeal</h1>
   //         <p className="text-sm text-emerald-800/70 mt-1 font-medium text-center mb-6">Connecting surplus food with those in need</p>
-
   //         {authError && <div className="mb-4 p-3 bg-rose-50 text-rose-700 text-sm font-semibold rounded-xl text-center border border-rose-100">{authError}</div>}
-
   //         <form onSubmit={handleAuth} className="space-y-4">
   //           {authStep === 1 ? (
   //             <>
   //               {authMode === 'register' && <input type="text" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Your Name / Organization" value={authForm.name} onChange={e => setAuthForm({...authForm, name: e.target.value})} />}
   //               <input type="tel" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Mobile Number" value={authForm.mobile} onChange={e => setAuthForm({...authForm, mobile: e.target.value})} />
   //               <input type="password" required className="w-full text-sm px-4 py-3.5 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-medium text-[#0B3529] outline-none" placeholder="Password" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} />
-
   //               {authMode === 'register' && (
   //                 <div className="grid grid-cols-2 gap-2 p-1.5 bg-[#F3F5F4] rounded-xl border border-gray-200/50">
   //                   <button type="button" onClick={() => setAuthForm({...authForm, role: 'volunteer'})} className={`py-2 text-xs font-bold rounded-lg cursor-pointer transition-all ${authForm.role === 'volunteer' ? 'bg-white text-[#0B3529] shadow-sm' : 'text-gray-500'}`}>NGO / Rescue</button>
@@ -538,16 +500,13 @@ const handleAuth = async (e) => {
   //                   </div>
   //                 </div>
   //               )}
-
   //               <input type="text" maxLength="6" required className="w-full text-center tracking-[0.5em] text-2xl px-4 py-4 rounded-xl bg-[#F8FAF9] border border-gray-200 focus:border-[#0B3529] font-bold text-[#0B3529] outline-none" placeholder="••••••" value={authForm.otp} onChange={e => setAuthForm({...authForm, otp: e.target.value})} />
   //             </div>
   //           )}
-            
   //           <button type="submit" disabled={isSubmitting} className={`w-full py-3.5 bg-[#0B3529] text-[#D4AF37] font-bold text-sm rounded-xl hover:opacity-95 shadow-md transition-all cursor-pointer ${isSubmitting ? 'opacity-70' : 'hover:opacity-95'}`}>
   //             {authStep === 1 ? 'Request Secure OTP' : (authMode === 'login' ? 'Verify & Log In' : 'Verify & Create Account')}
   //           </button>
-  //         </form>
-          
+  //         </form>   
   //         {authStep === 1 && (
   //           <div className="mt-6 text-center">
   //             <button onClick={() => { setAuthMode(authMode === 'login' ? 'register' : 'login'); setAuthError(''); }} className="text-sm font-semibold text-[#125441] hover:text-[#0B3529] cursor-pointer">
@@ -601,7 +560,6 @@ const handleAuth = async (e) => {
       </div>
     );
   }
-  
   return (
     <div className={`flex flex-col min-h-screen bg-[#FAFAFA] ${theme.primaryText} font-sans antialiased tracking-tight transition-all duration-300 ease-out ${isTransitioning ? 'opacity-30 scale-[0.99] filter blur-sm' : 'opacity-100 scale-100'}`}>
           <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 z-50 shadow-sm shrink-0">
@@ -613,8 +571,6 @@ const handleAuth = async (e) => {
               <ShareMealLogo isDonor={isDonor} className="h-8 w-8" />
               <span className="hidden sm:block text-xl font-extrabold tracking-tight">ShareMeal</span>
             </div>
-            
-            {/* Removed 'hidden sm:block' so it renders on mobile */}
             <div className="block"><LiveLocationBadge isDonor={isDonor} /></div>
           </div>
           {/* donate button centered in mobile
