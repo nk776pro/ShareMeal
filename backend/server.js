@@ -187,8 +187,8 @@ async function pollTelegramUpdates() {
   //     }
   //   }
   // } 
-  catch (err) { console.error("Polling system interface warning caught:", err); }
-  setTimeout(pollTelegramUpdates, 4000);
+  //catch (err) { console.error("Polling system interface warning caught:", err); }
+  //setTimeout(pollTelegramUpdates, 4000);
 }
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Secure Core Engine online on active distribution framework node ${PORT}`));
