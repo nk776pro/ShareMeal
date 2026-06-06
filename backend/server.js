@@ -116,13 +116,13 @@ app.post('/api/listings', authenticateToken, async (req, res) => {
       donorId: req.user.id
     });
     await newListing.save();
-    const telegramMsg = `🚨 *URGENT SURPLUS ALERT* 🚨\n\n📍 *Venue:* ${newListing.hallName}\n🍲 *Food Details:* ${newListing.foodDetails}\n👥 *Portions:* ~${newListing.totalServings} Plates\n🌱 *Matrix Type:* ${newListing.isVeg ? '🌱 Pure Veg' : '🍗 Non-Veg'}\n🗺️ *Sector:* ${newListing.location}\n📞 *Hotline Link:* ${newListing.contact}`;
+    const telegramMsg = `🚨 *FOOD SURPLUS ALERT* 🚨\n\n*Venue:* ${newListing.hallName}\n*Food:* ${newListing.foodDetails}\n*Servings / Plates:* ~${newListing.totalServings} Plates\n🌱 *Food Details:* ${newListing.isVeg ? '🌱 Pure Veg' : '🍗 Non-Veg'}\n*Location:* ${newListing.location}\n*Contact:* ${newListing.contact}\n\nReply to this message with "*Claimed [Venue Name]*" once your're ready to collect.\n*Thank You 😊*`;
     if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
       await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: process.env.TELEGRAM_CHAT_ID, text: telegramMsg, parse_mode: 'Markdown' })
-      }).catch(err => console.error("Telegram notify failed seamlessly:", err));
+      }).catch(err => console.error("Telegram notify failed :", err));
     }
     res.status(201).json(newListing);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -140,13 +140,13 @@ app.patch('/api/listings/:id/claim', authenticateToken, async (req, res) => {
 app.patch('/api/listings/:id/complete', authenticateToken, async (req, res) => {
   try {
     const completedListing = await Listing.findByIdAndUpdate(req.params.id, { status: 'completed', proofPhotoUrl: req.body.photoUrl }, { new: true });
-    const completionMessage = `🎉 *RESCUE SUCCESS CONFIRMED* 🎉\n\n✅ Supply from *${completedListing.hallName}* completely allocated.\n🤝 Assigned Courier Node: *${completedListing.volunteerName}*\n📸 Verification image secured on infrastructure block safely.`;
+    const completionMessage = `*RESCUE SUCCESS CONFIRMED* 🎉\n\n✅ Supply from *${completedListing.hallName}* completely allocated.\n🤝 Assigned Courier Node: *${completedListing.volunteerName}*\n📸 Verification image secured safely.`;
     if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
       await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: process.env.TELEGRAM_CHAT_ID, text: completionMessage, parse_mode: 'Markdown' })
-      }).catch(err => console.error("Telegram completion logging failed seamlessly:", err));
+      }).catch(err => console.error("Telegram completion logging failed :", err));
     }
     res.json(completedListing);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -173,7 +173,7 @@ async function pollTelegramUpdates() {
                 event.volunteerName = responderName;
                 await event.save();
                 
-                const ack = `*Network Sync Node Action:* Entry *${event.hallName}* successfully shifted matrix state to CLAIMED by user *${responderName}* via Telegram Interlock.`;
+                const ack = `*ORDER CLAIMED* Food on Venue *${event.hallName}* successfully CLAIMED by user *${responderName}* via Telegram Interlock.\n\n*We kindly request you to take a picture of the order and post it in the App to complete the order.*\n\n*THANK YOU*`;
                 await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -185,7 +185,7 @@ async function pollTelegramUpdates() {
         }
       }
     }
-  } catch (err) { console.error("Polling system interface warning caught seamlessly:", err); }
+  } catch (err) { console.error("Polling system interface warning caught:", err); }
   setTimeout(pollTelegramUpdates, 4000);
 }
 const PORT = process.env.PORT || 5000;
