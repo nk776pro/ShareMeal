@@ -1,22 +1,13 @@
 import ShareMealLogo from './ShareMealLogo';
 import { useState, useEffect } from 'react';
-import { 
-  MapPin, PhoneCall, Send, LogOut, Compass, 
-  Search, ArrowRight, Heart, Star, 
-  Filter, Plus, Flame, Sparkles, Camera, Building, 
-  User, UserCircle, Settings, Shield, Award, CheckCircle2, Menu, X
-} from 'lucide-react';
+import { MapPin, PhoneCall, Send, LogOut, Compass, Search, ArrowRight, Heart, Star, Filter, Plus, Flame, Sparkles, Camera, Building, User, UserCircle, Settings, Shield, Award, CheckCircle2, Menu, X} from 'lucide-react';
 
-// ==========================================
-// ENVIRONMENT PRODUCTION CONFIGURATION
-// ==========================================
+//Environment variables
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "your_cloud_name"; 
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_PRESET || "sharemeal_proofs"; 
 
-// ==========================================
-// LIVE DYNAMIC LOCATION BADGE W/ MANUAL OVERRIDE
-// ==========================================
+// live location function
 function LiveLocationBadge({ isDonor = true }) {
   const [locationName, setLocationName] = useState("Acquiring GPS...");
   const [hasError, setHasError] = useState(false);
@@ -110,7 +101,8 @@ function LiveLocationBadge({ isDonor = true }) {
 //       );
 //     } else { setLocationName("GPS Unsupported"); }
 //   }, []);
-
+  
+// using geoapify
 useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -121,7 +113,6 @@ useEffect(() => {
             const data = await res.json();
             
             if (data.features && data.features.length > 0) {
-              // Geoapify organizes data beautifully. We can get the specific suburb/neighborhood
               const props = data.features[0].properties;
               const specificLocation = props.suburb || props.neighbourhood || props.city || "Local Area";
               setLocationName(specificLocation);
@@ -145,12 +136,7 @@ useEffect(() => {
 
   if (isEditing) {
     return (
-      <input 
-        type="text" 
-        value={locationName} 
-        onChange={(e) => setLocationName(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onBlur={() => setIsEditing(false)}
+      <input type="text" value={locationName} onChange={(e) => setLocationName(e.target.value)}onKeyDown={handleKeyDown}onBlur={() => setIsEditing(false)}
         autoFocus
         className="text-xs font-semibold text-gray-700 rounded-xl bg-[#F3F5F4] px-4 py-2 border border-emerald-500/40 outline-none w-36 shadow-sm transition-all focus:bg-white focus:ring-1 focus:ring-emerald-500"
         placeholder="Type location..."
@@ -173,9 +159,7 @@ useEffect(() => {
   );
 }
 
-// ==========================================
-// SUCCESS MODAL
-// ==========================================
+// to show success message for donating food
 function SuccessModal({ isOpen, onClose }) {
   const [showCheck, setShowCheck] = useState(false);
   useEffect(() => {
@@ -208,9 +192,7 @@ function SuccessModal({ isOpen, onClose }) {
   );
 }
 
-// ==========================================
-// LEGAL MODAL (Terms & Privacy)
-// ==========================================
+// for T&C
 function LegalModal({ isOpen, type, onClose }) {
   if (!isOpen) return null;
   return (
@@ -233,21 +215,15 @@ function LegalModal({ isOpen, type, onClose }) {
   );
 }
 
-// ==========================================
-// MAIN APPLICATION
-// ==========================================
+// Total App
 export default function App() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('sharemeal_user')) || null);
   const [token, setToken] = useState(localStorage.getItem('sharemeal_token') || null);
-  
-  // Auth Form State (UPDATED FOR OTP)
   const [authMode, setAuthMode] = useState('login'); 
   //const [authStep, setAuthStep] = useState(1);
   const [authForm, setAuthForm] = useState({ name: '', mobile: '', password: '', role: 'volunteer', otp: '' });
   const [authError, setAuthError] = useState('');
-  //const [demoOtp, setDemoOtp] = useState(''); // Holds Intercepted Sandbox Payload Telemetry Safely
-
-  // Active UI Navigation States
+  //const [demoOtp, setDemoOtp] = useState(''); 
   const [activeScreen, setActiveScreen] = useState('feed'); 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -255,21 +231,16 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Data Streams
   const [listings, setListings] = useState([]);
   const [feedFilter, setFeedFilter] = useState('all'); 
   const [searchQuery, setSearchQuery] = useState('');
   const [favorites, setFavorites] = useState([]);
   const [uploadingId, setUploadingId] = useState(null);
-  
   const [profileForm, setProfileForm] = useState({ name: '', mobile: user?.mobile || '' });
   const [formData, setFormData] = useState({ 
     hallName: '', foodDetails: '', totalServings: '', location: '', contact: '', isVeg: true, isPacked: false, hasLiquid: false
   });
-
   const isDonor = user?.role === 'donor';
-  
   const theme = {
     primary: isDonor ? 'bg-[#0B3529]' : 'bg-[#2E0854]',
     primaryText: isDonor ? 'text-[#0B3529]' : 'text-[#2E0854]',
@@ -287,14 +258,12 @@ export default function App() {
     footerBorder: isDonor ? 'border-emerald-900/40' : 'border-purple-950/60',
     footerText: isDonor ? 'text-emerald-100/70' : 'text-purple-200/70'
   };
-
   const categories = [
     { id: 'all', label: 'All Available Food', emoji: '🍽️' },
     { id: 'veg', label: 'Pure Veg', emoji: '🌱' },
     { id: 'nonveg', label: 'Non-Veg / Biryani', emoji: '🍗' },
     { id: 'high', label: 'High Yield (50+)', emoji: '🍲' },
   ];
-
   const fetchListings = async () => {
     try {
       const res = await fetch(`${BACKEND_URL}/listings`);
@@ -302,20 +271,17 @@ export default function App() {
       if (Array.isArray(data)) setListings(data);
     } catch (err) { console.error("Stream Fetch Blocked:", err); }
   };
-
   useEffect(() => {
     fetchListings();
     if(user) setProfileForm({ name: user.name, mobile: user.mobile });
     const interval = setInterval(fetchListings, 4000); 
     return () => clearInterval(interval);
   }, [user]);
-
-  // UPDATED AUTHENTICATION HANDLER
+  
+  // OTP (Not in use)
   // const handleAuth = async (e) => {
   //   e.preventDefault();
   //   setAuthError('');
-    
-  //   // STEP 1: Request OTP
   //   if (authStep === 1) {
   //     setIsSubmitting(true);
   //     try {
@@ -335,8 +301,6 @@ export default function App() {
   //     finally { setIsSubmitting(false); }
   //     return;
   //   }
-
-  //   // STEP 2: Verify OTP and Login/Register
   //   try {
   //     setIsSubmitting(true);
   //     const res = await fetch(`${BACKEND_URL}/auth/${authMode}`, {
@@ -346,14 +310,13 @@ export default function App() {
   //     });
   //     const data = await res.json();
   //     if (data.error) { setAuthError(data.error); return; }
-      
   //     localStorage.setItem('sharemeal_token', data.token);
   //     localStorage.setItem('sharemeal_user', JSON.stringify(data.user));
   //     setToken(data.token);
   //     setUser(data.user);
   //     setActiveScreen('feed');
-  //     setAuthStep(1); // Reset for future logouts
-  //     setDemoOtp(''); // Reset trace matrix
+  //     setAuthStep(1); 
+  //     setDemoOtp(''); 
   //   } catch (err) { setAuthError('Connection error. Please try again.'); }
   //   finally { setIsSubmitting(false); }
   // };
@@ -362,7 +325,6 @@ const handleAuth = async (e) => {
     e.preventDefault();
     setAuthError('');
     setIsSubmitting(true);
-    
     try {
       const res = await fetch(`${BACKEND_URL}/auth/${authMode}`, {
         method: 'POST',
@@ -371,7 +333,6 @@ const handleAuth = async (e) => {
       });
       const data = await res.json();
       if (data.error) { setAuthError(data.error); return; }
-      
       localStorage.setItem('sharemeal_token', data.token);
       localStorage.setItem('sharemeal_user', JSON.stringify(data.user));
       setToken(data.token);
@@ -383,7 +344,6 @@ const handleAuth = async (e) => {
       setIsSubmitting(false); 
     }
   };
-  
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
@@ -403,7 +363,6 @@ const handleAuth = async (e) => {
       setIsEditingProfile(false);
     } catch (err) { console.error("Profile cluster exception:", err); }
   };
-
   const handleCreatePost = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -423,7 +382,6 @@ const handleAuth = async (e) => {
       }
     } catch (err) { console.error("Broadcast interruption:", err); } finally { setIsSubmitting(false); }
   };
-
   const handleClaimRequest = async (id) => {
     try {
       const res = await fetch(`${BACKEND_URL}/listings/${id}/claim`, {
@@ -437,7 +395,6 @@ const handleAuth = async (e) => {
       if(res.ok) fetchListings();
     } catch (err) { console.error("Dispatch mapping error:", err); }
   };
-
   const compressImageFile = (file) => {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -450,7 +407,6 @@ const handleAuth = async (e) => {
           const MAX_BOUNDS = 800; 
           let width = img.width;
           let height = img.height;
-
           if (width > height) {
             if (width > MAX_BOUNDS) {
               height *= MAX_BOUNDS / width;
@@ -464,10 +420,8 @@ const handleAuth = async (e) => {
           }
           canvas.width = width;
           canvas.height = height;
-          
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
-          
           canvas.toBlob((blob) => {
             const optimizedFile = new File([blob], file.name, {
               type: 'image/jpeg',
@@ -479,22 +433,18 @@ const handleAuth = async (e) => {
       };
     });
   };
-
   const handlePhotoUploadAndComplete = async (e, listingId) => {
     const file = e.target.files[0];
     if (!file) return;
     setUploadingId(listingId);
-    
     try {
       const compressedFile = await compressImageFile(file);
       const data = new FormData();
       data.append('file', compressedFile);
       data.append('upload_preset', UPLOAD_PRESET);
       data.append('cloud_name', CLOUD_NAME);
-
       const cloudinaryRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: data });
       const cloudinaryData = await cloudinaryRes.json();
-      
       const res = await fetch(`${BACKEND_URL}/listings/${listingId}/complete`, {
         method: 'PATCH',
         headers: { 
@@ -506,7 +456,6 @@ const handleAuth = async (e) => {
       if(res.ok) fetchListings(); 
     } catch (error) { console.error("Cloudinary compressed pipeline handshake failure:", error); } finally { setUploadingId(null); }
   };
-
   const toggleRole = (targetRole, targetScreen = null) => {
     if (!user || user.role === targetRole) {
       if (targetScreen) setActiveScreen(targetScreen);
@@ -522,7 +471,6 @@ const handleAuth = async (e) => {
       setTimeout(() => setIsTransitioning(false), 200);
     }, 250); 
   };
-
   const filteredListings = listings.filter(l => {
     const matchesSearch = l.foodDetails?.toLowerCase().includes(searchQuery.toLowerCase()) || l.hallName?.toLowerCase().includes(searchQuery.toLowerCase());
     if (!matchesSearch) return false;
@@ -531,17 +479,14 @@ const handleAuth = async (e) => {
     if (feedFilter === 'high') return (l.servingsAvailable || l.totalServings) >= 50;
     return true;
   });
-
   const toggleFavorite = (id) => {
     if (favorites.includes(id)) setFavorites(favorites.filter(favId => favId !== id));
     else setFavorites([...favorites, id]);
   };
-
   const userListings = listings.filter(l => isDonor ? l.donorId === user?._id : l.volunteerId === user?._id);
   const archivedRunsCount = userListings.filter(l => l.status === 'completed').length;
   const totalSavedPlatesCount = userListings.filter(l => l.status === 'completed').reduce((sum, item) => sum + (item.totalServings || 0), 0);
 
-  // UPDATED AUTHENTICATION RENDER
   // if (!user) {
   //   return (
   //     <div className="min-h-screen bg-[#F3F5F4] flex flex-col items-center justify-center p-4 tracking-tight">
@@ -579,7 +524,7 @@ const handleAuth = async (e) => {
   //                 Secure OTP sent to <br/><span className="text-sm font-black">{authForm.mobile}</span>
   //               </div>
 
-  //               {/* DYNAMIC SANDBOX DLT REGULATORY SIMULATION COMPONENT */}
+// Sandbox
   //               {demoOtp && (
   //                 <div className="mb-4 bg-[#f0fdf4] border border-dashed border-[#22c55e] rounded-xl p-4 text-center shadow-sm">
   //                   <p className="m-0 text-[11px] text-[#166534] font-black uppercase tracking-wider flex justify-center items-center gap-1.5">
@@ -657,15 +602,12 @@ const handleAuth = async (e) => {
     );
   }
   
-
   return (
     <div className={`flex flex-col min-h-screen bg-[#FAFAFA] ${theme.primaryText} font-sans antialiased tracking-tight transition-all duration-300 ease-out ${isTransitioning ? 'opacity-30 scale-[0.99] filter blur-sm' : 'opacity-100 scale-100'}`}>
-      
-      
           <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 z-50 shadow-sm shrink-0">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between relative">
           
-          {/* LEFT SIDE: LOGO & LOCATION (Fixed for Mobile) */}
+// Logo & Location for Mobile (fixed)
           <div className="flex items-center gap-3 sm:gap-8">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveScreen('feed'); setIsMobileMenuOpen(false); }}>
               <ShareMealLogo isDonor={isDonor} className="h-8 w-8" />
@@ -675,10 +617,7 @@ const handleAuth = async (e) => {
             {/* Removed 'hidden sm:block' so it renders on mobile */}
             <div className="block"><LiveLocationBadge isDonor={isDonor} /></div>
           </div>
-
-          {/* ... [Rest of your Navbar code] ... */}
-
-          {/* MOBILE ONLY: CENTERED DONATE FOOD BUTTON 
+          {/* donate button centered in mobile
           {user?.role === 'donor' && (
             <button 
               onClick={() => { setActiveScreen('create'); setIsMobileMenuOpen(false); }} 
@@ -688,46 +627,29 @@ const handleAuth = async (e) => {
             </button>
           )}*/}
 
-          {/* MOBILE ONLY: RIGHT SIDE ACTIONS (Plus + Menu) */}
+// Hamburger option for movile
           <div className="sm:hidden flex items-center gap-3">
-            
             {user?.role === 'donor' && (
-              <button 
-                onClick={() => { setActiveScreen('create'); setIsMobileMenuOpen(false); }} 
-                className={`flex items-center justify-center h-9 w-9 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl shadow-sm cursor-pointer transition-all ${activeScreen === 'create' ? 'ring-2 ring-emerald-400' : ''}`}
-                title="Donate Food"
-              >
-                <Plus size={20} />
-              </button>
-            )}
-
-            <button 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-              className="text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer p-1 transition-transform active:scale-90"
-            >
+              <button onClick={() => { setActiveScreen('create'); setIsMobileMenuOpen(false); }} className={`flex items-center justify-center h-9 w-9 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl shadow-sm cursor-pointer transition-all ${activeScreen === 'create' ? 'ring-2 ring-emerald-400' : ''}`} title="Donate Food"><Plus size={20} /></button>)}
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer p-1 transition-transform active:scale-90">
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
-            
           </div>
 
-          {/* DESKTOP ACTIONS: AUTO HIDDEN ON MOBILE */}
+// PC elements that are hidden in mobile
           <div className="hidden sm:flex items-center gap-6">
             <button onClick={() => setActiveScreen('feed')} className={`text-sm font-bold flex items-center gap-1.5 cursor-pointer transition-all ${activeScreen === 'feed' ? `${theme.primaryText} border-b-2 ${theme.accentBorder} pb-1` : 'text-gray-400 hover:text-gray-600'}`}><Compass size={16} /> <span>Find Food</span></button>
             {user?.role === 'donor' && <button onClick={() => setActiveScreen('create')} className={`text-sm font-bold flex items-center gap-1.5 cursor-pointer transition-all ${activeScreen === 'create' ? `${theme.primaryText} border-b-2 ${theme.accentBorder} pb-1` : 'text-gray-400 hover:text-gray-600'}`}><Plus size={18} /> <span className="hidden sm:block">Donate Food</span></button>}
-            
             <div className="h-5 w-[1px] bg-gray-200" />
-
             <div className="relative bg-[#EBEDEA] p-1 rounded-xl flex items-center border border-gray-200/50 w-44 h-10 shadow-inner">
               <div className={`absolute top-1 bottom-1 left-1 rounded-lg transition-all duration-300 shadow-sm ${isDonor ? 'w-[82px] translate-x-0 bg-[#0B3529]' : 'w-[82px] translate-x-[80px] bg-[#2E0854]'}`} />
               <button onClick={() => toggleRole('donor')} className={`z-10 flex-1 flex items-center justify-center gap-1 h-full text-xs font-bold cursor-pointer transition-colors ${isDonor ? 'text-[#D4AF37]' : 'text-gray-500'}`}><Building size={12} /> Donor</button>
               <button onClick={() => toggleRole('volunteer')} className={`z-10 flex-1 flex items-center justify-center gap-1 h-full text-xs font-bold cursor-pointer transition-colors ${!isDonor ? 'text-[#FF6B35]' : 'text-gray-500'}`}><User size={12} /> Rescue</button>
             </div>
-
             <button onClick={() => setActiveScreen('account')} className={`cursor-pointer transform hover:scale-105 active:scale-95 transition-all ${activeScreen === 'account' ? theme.primaryText : 'text-gray-400'}`}><UserCircle size={22} /></button>
             <button onClick={() => { localStorage.clear(); setUser(null); setToken(null); }} className="text-gray-400 hover:text-rose-600 cursor-pointer"><LogOut size={16} /></button>
           </div>
-
-          {/* MOBILE ONLY: 3-LINE MENU TOGGLE BUTTON 
+          {/*  Menu button for moile 
           <div className="sm:hidden flex items-center">
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
@@ -738,8 +660,8 @@ const handleAuth = async (e) => {
           </div>*/}
         </div>
 
-        {/* MOBILE DROPDOWN MODAL SLIDE */}
-        {isMobileMenuOpen && (
+// Dropdown for moble
+            {isMobileMenuOpen && (
           <div className="sm:hidden absolute top-20 left-0 right-0 bg-white border-b border-gray-200 shadow-xl p-5 flex flex-col gap-4 z-40 animate-[fadeIn_0.2s_ease-out]">
             <button 
               onClick={() => { setActiveScreen('feed'); setIsMobileMenuOpen(false); }} 
@@ -747,7 +669,6 @@ const handleAuth = async (e) => {
             >
               <Compass size={18} /> <span>Find Food</span>
             </button>
-
             <div className="relative bg-[#EBEDEA] p-1 rounded-xl flex items-center border border-gray-200/50 w-full h-12 shadow-inner mt-1">
               <div 
                 className="absolute top-1 bottom-1 rounded-lg transition-all duration-300 shadow-sm"
@@ -755,37 +676,29 @@ const handleAuth = async (e) => {
                   width: 'calc(50% - 6px)',
                   left: isDonor ? '4px' : 'calc(50% + 2px)',
                   backgroundColor: isDonor ? '#0B3529' : '#2E0854'
-                }}
-              />
+                }}/>
               <button 
                 onClick={() => { toggleRole('donor'); }} 
-                className={`z-10 flex-1 flex items-center justify-center gap-1.5 h-full text-xs font-extrabold cursor-pointer transition-colors ${isDonor ? 'text-[#D4AF37]' : 'text-gray-500'}`}
-              >
+                className={`z-10 flex-1 flex items-center justify-center gap-1.5 h-full text-xs font-extrabold cursor-pointer transition-colors ${isDonor ? 'text-[#D4AF37]' : 'text-gray-500'}`}>
                 <Building size={14} /> Donor
               </button>
               <button 
                 onClick={() => { toggleRole('volunteer'); }} 
-                className={`z-10 flex-1 flex items-center justify-center gap-1.5 h-full text-xs font-extrabold cursor-pointer transition-colors ${!isDonor ? 'text-[#FF6B35]' : 'text-gray-500'}`}
-              >
+                className={`z-10 flex-1 flex items-center justify-center gap-1.5 h-full text-xs font-extrabold cursor-pointer transition-colors ${!isDonor ? 'text-[#FF6B35]' : 'text-gray-500'}`}>
                 <User size={14} /> Rescue
               </button>
             </div>
-
             <div className="h-[1px] bg-gray-100 my-1" />
-
             <div className="flex items-center justify-between gap-3">
               <button 
                 onClick={() => { setActiveScreen('account'); setIsMobileMenuOpen(false); }} 
-                className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 border border-gray-200 transition-all ${activeScreen === 'account' ? `${theme.lightBg} ${theme.primaryText} border-transparent` : 'text-gray-600 bg-white hover:bg-gray-50'}`}
-              >
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 border border-gray-200 transition-all ${activeScreen === 'account' ? `${theme.lightBg} ${theme.primaryText} border-transparent` : 'text-gray-600 bg-white hover:bg-gray-50'}`}>
                 <UserCircle size={18} /> <span>Account Center</span>
               </button>
-              
               <button 
                 onClick={() => { localStorage.clear(); setUser(null); setToken(null); setIsMobileMenuOpen(false); }} 
                 className="p-3 bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-100 rounded-xl cursor-pointer flex items-center justify-center transition-colors"
-                title="Log Out"
-              >
+                title="Log Out">
                 <LogOut size={18} />
               </button>
             </div>
@@ -810,8 +723,7 @@ const handleAuth = async (e) => {
           </div>
         </header>
       )}
-
-      {/* FILTER MATRIX STRIP */}
+      // Filter
       {activeScreen === 'feed' && (
         <section className="max-w-6xl mx-auto w-full px-6 pt-8 shrink-0">
           <div className="flex gap-3 overflow-x-auto whitespace-nowrap pb-2 scrollbar-none">
@@ -823,12 +735,9 @@ const handleAuth = async (e) => {
           </div>
         </section>
       )}
-
-      {/* LAYOUT CONTAINER */}
+      // Layout
       <main className="flex-grow w-full max-w-6xl mx-auto px-6 pt-6 pb-20">
-        
-        {/* VIEW ARCHITECTURE: STREAM LOGS */}
-        {activeScreen === 'feed' && (
+                {activeScreen === 'feed' && (
           <div className="space-y-6">
             <div className="flex justify-between items-end border-b border-gray-100 pb-3">
               <div>
@@ -838,7 +747,6 @@ const handleAuth = async (e) => {
                 <Filter size={12} className={theme.accentText} /> Filter
               </div>
             </div>
-
             {filteredListings.length === 0 ? (
               <div className="py-20 text-center max-w-sm mx-auto bg-white rounded-2xl border border-gray-100">
                 <p className="text-sm font-semibold text-gray-500">No active donations found.</p>
@@ -849,7 +757,6 @@ const handleAuth = async (e) => {
                   const isFavorited = favorites.includes(item._id);
                   const currentServings = item.servingsAvailable !== undefined ? item.servingsAvailable : item.totalServings;
                   const servingPercentage = Math.min(100, (currentServings / item.totalServings) * 100);
-
                   return (
                     <div key={item._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col group relative">
                       <div className={`h-32 w-full relative p-5 flex flex-col justify-between bg-gradient-to-br ${item.isVeg ? theme.cardGradient : theme.altCardGradient}`}>
@@ -866,7 +773,6 @@ const handleAuth = async (e) => {
                           <span className="bg-black/30 px-2 py-0.5 rounded-md capitalize">{item.status}</span>
                         </div>
                       </div>
-
                       <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                         <div>
                           <h4 className="text-lg font-bold text-gray-900 truncate">{item.hallName}</h4>
@@ -882,7 +788,6 @@ const handleAuth = async (e) => {
                             </div>
                           </div>
                         </div>
-
                         <div className="pt-4 border-t border-gray-50 flex flex-col gap-2">
                           {item.status === 'completed' ? (
                             <div className="w-full py-3 bg-emerald-50 text-emerald-700 text-center rounded-xl text-sm font-bold border border-emerald-100">🎉 Delivery Successful</div>
@@ -891,7 +796,6 @@ const handleAuth = async (e) => {
                               <div className="w-full py-2 bg-gray-50 text-gray-600 text-center rounded-xl text-xs font-semibold border border-dashed border-gray-200">Picked up by: {item.volunteerName}</div>
                               <div className="flex items-center gap-2">
                                 <a href={`tel:${item.contact}`} className="p-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl cursor-pointer"><PhoneCall size={16} /></a>
-                                
                                 {!isDonor ? (
                                   <>
                                     <input type="file" accept="image/*" capture="environment" className="hidden" id={`camera-${item._id}`} onChange={(e) => handlePhotoUploadAndComplete(e, item._id)} />
@@ -925,8 +829,6 @@ const handleAuth = async (e) => {
             )}
           </div>
         )}
-
-        {/* VIEW ARCHITECTURE: INVENTORY LOGGER */}
         {activeScreen === 'create' && user.role === 'donor' && (
           <div className="max-w-lg mx-auto bg-white border border-gray-100 shadow-md rounded-3xl p-6 sm:p-10 space-y-6">
             <div className="border-b border-gray-100 pb-4">
@@ -968,8 +870,6 @@ const handleAuth = async (e) => {
             </form>
           </div>
         )}
-
-        {/* VIEW ARCHITECTURE: CONTROL CENTRE */}
         {activeScreen === 'account' && (
           <div className="max-w-xl mx-auto space-y-6">
             <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm relative overflow-hidden">
@@ -997,7 +897,6 @@ const handleAuth = async (e) => {
                 </form>
               )}
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white rounded-2xl p-6 border border-gray-100 flex items-center gap-4 shadow-sm">
                 <span className="text-3xl">📦</span>
@@ -1014,7 +913,6 @@ const handleAuth = async (e) => {
                 </div>
               </div>
             </div>
-
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               <div className="px-6 py-4 bg-gray-50 text-xs font-bold text-gray-500 uppercase tracking-wide border-b border-gray-100">Legal & Compliance</div>
               <div className="divide-y divide-gray-100">
@@ -1031,8 +929,7 @@ const handleAuth = async (e) => {
           </div>
         )}
       </main>
-
-      {/* COMPACT GLOBAL FOOTER */}
+// Footer
       <footer className={`w-full mt-auto py-10 border-t ${theme.footerBg} ${theme.footerBorder} shrink-0`}>
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-xs font-semibold text-white/50 text-center md:text-left gap-3">
           <span>&copy; 2026 ShareMeal Platform</span>
@@ -1040,7 +937,7 @@ const handleAuth = async (e) => {
         </div>
       </footer>
 
-      {/* FLOATING SYSTEM MODALS */}
+      // T&C
       <SuccessModal isOpen={isModalOpen} onClose={() => { setModalOpen(false); setActiveScreen('feed'); }} />
       <LegalModal isOpen={!!legalModalType} type={legalModalType} onClose={() => setLegalModalType(null)} />
     </div>
