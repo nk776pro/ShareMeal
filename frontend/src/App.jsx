@@ -884,34 +884,67 @@ function LiveLocationBadge({ isDonor = true }) {
   //   } else { setLocationName("GPS Unsupported"); }
   // }, []);
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   if ("geolocation" in navigator) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       async (position) => {
+  //         try {
+  //           const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  //           const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${GOOGLE_API_KEY}`);
+  //           const data = await res.json();
+            
+  //           // 🚨 THIS WILL TELL US THE PROBLEM:
+  //           console.log("GOOGLE API RESPONSE:", data); 
+
+  //           if (data.results && data.results.length > 0) {
+  //             const addressComponents = data.results[0].address_components;
+  //             const localArea = addressComponents.find(c => c.types.includes("sublocality") || c.types.includes("locality"));
+  //             setLocationName(localArea ? localArea.long_name : "Local Area");
+  //           } else {
+  //             setLocationName("Location Unknown");
+  //           }
+  //         } catch (error) { 
+  //           console.error("Fetch failed:", error);
+  //           setLocationName("Chennai Central"); 
+  //         }
+  //       },
+  //       (err) => { console.error("GPS Error", err); setHasError(true); setLocationName("Location Denied"); }
+  //     );
+  //   } else { setLocationName("GPS Unsupported"); }
+  // }, []);
+useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
-            const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-            const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${GOOGLE_API_KEY}`);
+            // Free OpenStreetMap API
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`);
             const data = await res.json();
             
-            // 🚨 THIS WILL TELL US THE PROBLEM:
-            console.log("GOOGLE API RESPONSE:", data); 
-
-            if (data.results && data.results.length > 0) {
-              const addressComponents = data.results[0].address_components;
-              const localArea = addressComponents.find(c => c.types.includes("sublocality") || c.types.includes("locality"));
-              setLocationName(localArea ? localArea.long_name : "Local Area");
+            // 🌟 THE PINPOINT FIX: Instead of looking for broken tags, extract the exact local area text
+            if (data.display_name) {
+              const addressParts = data.display_name.split(',');
+              
+              // This grabs the first two specific details (e.g., "Street Name, Neighborhood") 
+              // instead of the broad state/country names at the end.
+              const pinpointLocation = addressParts.slice(0, 2).join(', ').trim();
+              
+              setLocationName(pinpointLocation);
             } else {
-              setLocationName("Location Unknown");
+              // Fallback if the full text fails
+              const fallback = data.address.suburb || data.address.neighbourhood || data.address.city || "Local Area";
+              setLocationName(fallback);
             }
           } catch (error) { 
-            console.error("Fetch failed:", error);
-            setLocationName("Chennai Central"); 
+            console.error("OSM Fetch failed:", error);
+            setLocationName("Chennai Central"); // Default fallback
           }
         },
-        (err) => { console.error("GPS Error", err); setHasError(true); setLocationName("Location Denied"); }
+        () => { setHasError(true); setLocationName("Location Denied"); }
       );
     } else { setLocationName("GPS Unsupported"); }
   }, []);
+  
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') setIsEditing(false);
   };
