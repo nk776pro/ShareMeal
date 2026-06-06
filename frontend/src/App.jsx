@@ -912,32 +912,58 @@ function LiveLocationBadge({ isDonor = true }) {
   //     );
   //   } else { setLocationName("GPS Unsupported"); }
   // }, []);
+// useEffect(() => {
+//     if ("geolocation" in navigator) {
+//       navigator.geolocation.getCurrentPosition(
+//         async (position) => {
+//           try {
+//             // Free OpenStreetMap API
+//             const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`);
+//             const data = await res.json();
+            
+//             // 🌟 THE PINPOINT FIX: Instead of looking for broken tags, extract the exact local area text
+//             if (data.display_name) {
+//               const addressParts = data.display_name.split(',');
+              
+//               // This grabs the first two specific details (e.g., "Street Name, Neighborhood") 
+//               // instead of the broad state/country names at the end.
+//               const pinpointLocation = addressParts.slice(0, 2).join(', ').trim();
+              
+//               setLocationName(pinpointLocation);
+//             } else {
+//               // Fallback if the full text fails
+//               const fallback = data.address.suburb || data.address.neighbourhood || data.address.city || "Local Area";
+//               setLocationName(fallback);
+//             }
+//           } catch (error) { 
+//             console.error("OSM Fetch failed:", error);
+//             setLocationName("Chennai Central"); // Default fallback
+//           }
+//         },
+//         () => { setHasError(true); setLocationName("Location Denied"); }
+//       );
+//     } else { setLocationName("GPS Unsupported"); }
+//   }, []);
+
 useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
-            // Free OpenStreetMap API
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`);
+            const API_KEY = import.meta.env.VITE_GEOAPIFY_API_KEY;
+            const res = await fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&apiKey=${API_KEY}`);
             const data = await res.json();
             
-            // 🌟 THE PINPOINT FIX: Instead of looking for broken tags, extract the exact local area text
-            if (data.display_name) {
-              const addressParts = data.display_name.split(',');
-              
-              // This grabs the first two specific details (e.g., "Street Name, Neighborhood") 
-              // instead of the broad state/country names at the end.
-              const pinpointLocation = addressParts.slice(0, 2).join(', ').trim();
-              
-              setLocationName(pinpointLocation);
+            if (data.features && data.features.length > 0) {
+              // Geoapify organizes data beautifully. We can get the specific suburb/neighborhood
+              const props = data.features[0].properties;
+              const specificLocation = props.suburb || props.neighbourhood || props.city || "Local Area";
+              setLocationName(specificLocation);
             } else {
-              // Fallback if the full text fails
-              const fallback = data.address.suburb || data.address.neighbourhood || data.address.city || "Local Area";
-              setLocationName(fallback);
+              setLocationName("Location Unknown");
             }
-          } catch (error) { 
-            console.error("OSM Fetch failed:", error);
-            setLocationName("Chennai Central"); // Default fallback
+          } catch (error) {
+            setLocationName("Chennai Central");
           }
         },
         () => { setHasError(true); setLocationName("Location Denied"); }
