@@ -678,7 +678,7 @@ const handleAuth = async (e) => {
 
           {/* ... [Rest of your Navbar code] ... */}
 
-          {/* MOBILE ONLY: CENTERED DONATE FOOD BUTTON */}
+          {/* MOBILE ONLY: CENTERED DONATE FOOD BUTTON 
           {user?.role === 'donor' && (
             <button 
               onClick={() => { setActiveScreen('create'); setIsMobileMenuOpen(false); }} 
@@ -686,7 +686,29 @@ const handleAuth = async (e) => {
             >
               <Plus size={14} /> <span className="hidden sm:block text-sm">Donate Food</span>
             </button>
-          )}
+          )}*/}
+
+          {/* MOBILE ONLY: RIGHT SIDE ACTIONS (Plus + Menu) */}
+          <div className="sm:hidden flex items-center gap-3">
+            
+            {user?.role === 'donor' && (
+              <button 
+                onClick={() => { setActiveScreen('create'); setIsMobileMenuOpen(false); }} 
+                className={`flex items-center justify-center h-9 w-9 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl shadow-sm cursor-pointer transition-all ${activeScreen === 'create' ? 'ring-2 ring-emerald-400' : ''}`}
+                title="Donate Food"
+              >
+                <Plus size={20} />
+              </button>
+            )}
+
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+              className="text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer p-1 transition-transform active:scale-90"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+            
+          </div>
 
           {/* DESKTOP ACTIONS: AUTO HIDDEN ON MOBILE */}
           <div className="hidden sm:flex items-center gap-6">
