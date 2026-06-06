@@ -587,39 +587,10 @@ const authenticateToken = (req, res, next) => {
 // =========================================================================
 
 // UPDATED ROUTE: Sandbox Developer Simulation Mode (Bypasses Telecom Issues)
-app.post('/api/auth/request-otp', async (req, res) => {
-  try {
-    const { mobile } = req.body;
-    if (!mobile) return res.status(400).json({ error: "Mobile number required." });
-
-    // 1. Generate a genuine, true-random unique 6-digit code
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    // 2. Clear any old OTPs and save new one into MongoDB
-    await OTP.findOneAndDelete({ mobile }); 
-    await new OTP({ mobile, otp: otpCode }).save();
-
-    console.log(`\n[DEVELOPER SANDBOX] 🛠️ Dynamic OTP generated for ${mobile}: ${otpCode}\n`);
-
-    // 3. Hand the verification context token back over the safe response payload
-    res.status(200).json({ 
-      success: true,
-      message: "OTP verification sequence initialized successfully via Sandbox Gateway.",
-      demoOtp: otpCode 
-    });
-  } catch (err) { 
-    res.status(500).json({ error: "Internal sandbox cluster failure: " + err.message }); 
-  }
-});
-
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { name, mobile, password, role, otp } = req.body; 
-    if(!name || !mobile || !password || !otp) return res.status(400).json({ error: "Missing required node telemetry fields." });
-
-    // VERIFY OTP FIRST
-    const validOtp = await OTP.findOne({ mobile, otp });
-    if (!validOtp) return res.status(400).json({ error: "Invalid or expired OTP." });
+    const { name, mobile, password, role } = req.body;
+    if(!name || !mobile || !password) return res.status(400).json({ error: "Missing required node telemetry fields." });
 
     const existingUser = await User.findOne({ mobile });
     if (existingUser) return res.status(400).json({ error: "Identifier sequence already claimed." });
@@ -631,8 +602,6 @@ app.post('/api/auth/register', async (req, res) => {
     const newUser = new User({ name, mobile, password: hashedPassword, role });
     await newUser.save();
     
-    await OTP.deleteOne({ _id: validOtp._id }); // Cleanup used OTP
-    
     const token = jwt.sign({ id: newUser._id, role: newUser.role }, process.env.JWT_SECRET || 'FALLBACK_LOCAL_SECRET_CHAIN', { expiresIn: '7d' });
     res.status(201).json({ token, user: { _id: newUser._id, name: newUser.name, mobile: newUser.mobile, role: newUser.role } });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -640,26 +609,17 @@ app.post('/api/auth/register', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { mobile, password, otp } = req.body; 
-    if(!otp) return res.status(400).json({ error: "Security OTP is required." });
-
-    // VERIFY OTP FIRST
-    const validOtp = await OTP.findOne({ mobile, otp });
-    if (!validOtp) return res.status(400).json({ error: "Invalid or expired OTP." });
-
+    const { mobile, password } = req.body;
     const user = await User.findOne({ mobile });
     if (!user) return res.status(400).json({ error: "Node credentials context unverified." });
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) return res.status(400).json({ error: "Invalid authentication pairing match." });
 
-    await OTP.deleteOne({ _id: validOtp._id }); // Cleanup used OTP
-
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'FALLBACK_LOCAL_SECRET_CHAIN', { expiresIn: '7d' });
     res.status(200).json({ token, user: { _id: user._id, name: user.name, mobile: user.mobile, role: user.role } });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
-
 app.put('/api/users/:id', authenticateToken, async (req, res) => {
   try {
     if (req.user.id !== req.params.id) return res.status(403).json({ error: "Unauthorized write state sequence block." });
