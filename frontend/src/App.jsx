@@ -1496,66 +1496,173 @@ const handleAuth = async (e) => {
     <div className={`flex flex-col min-h-screen bg-[#FAFAFA] ${theme.primaryText} font-sans antialiased tracking-tight transition-all duration-300 ease-out ${isTransitioning ? 'opacity-30 scale-[0.99] filter blur-sm' : 'opacity-100 scale-100'}`}>
       
       
-{/* GLOBAL NAVBAR */}
-      <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 z-50 shadow-sm shrink-0">
-        {/* Adjusted padding and height for mobile */}
-        <div className="max-w-6xl mx-auto px-3 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2">
+// {/* GLOBAL NAVBAR */}
+//       <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 z-50 shadow-sm shrink-0">
+//         {/* Adjusted padding and height for mobile */}
+//         <div className="max-w-6xl mx-auto px-3 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2">
           
-          {/* LEFT SIDE: LOGO & LOCATION */}
-          {/* Added min-w-0 so the location text can truncate instead of pushing other items */}
-          <div className="flex items-center gap-2 sm:gap-6 min-w-0 flex-1">
-            <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={() => { setActiveScreen('feed'); setIsMobileMenuOpen(false); }}>
-              <ShareMealLogo isDonor={isDonor} className="h-7 w-7 sm:h-8 sm:w-8" />
-              {/* Hide "ShareMeal" text on small screens, show on lg screens */}
-              <span className="hidden lg:block text-xl font-extrabold tracking-tight">ShareMeal</span>
+//           {/* LEFT SIDE: LOGO & LOCATION */}
+//           {/* Added min-w-0 so the location text can truncate instead of pushing other items */}
+//           <div className="flex items-center gap-2 sm:gap-6 min-w-0 flex-1">
+//             <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={() => { setActiveScreen('feed'); setIsMobileMenuOpen(false); }}>
+//               <ShareMealLogo isDonor={isDonor} className="h-7 w-7 sm:h-8 sm:w-8" />
+//               {/* Hide "ShareMeal" text on small screens, show on lg screens */}
+//               <span className="hidden lg:block text-xl font-extrabold tracking-tight">ShareMeal</span>
+//             </div>
+            
+//             <div className="min-w-0 flex-1">
+//               <LiveLocationBadge isDonor={isDonor} />
+//             </div>
+//           </div>
+
+//           {/* RIGHT SIDE: PROFILE & ACTIONS */}
+//           <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+            
+//             {/* DONATE FOOD / POST BUTTON */}
+//             {isDonor ? (
+//               <button 
+//                 onClick={() => setActiveScreen('post')}
+//                 className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-[#0B3529] hover:bg-[#125441] text-[#D4AF37] rounded-xl font-bold transition-all shadow-sm"
+//               >
+//                 <Plus size={18} />
+//                 {/* 🌟 THE FIX: Hidden on mobile, visible on sm and up */}
+//                 <span className="hidden sm:block text-sm">Donate Food</span>
+//               </button>
+//             ) : (
+//               <button className="hidden sm:flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl font-bold">
+//                 <Heart size={18} className="fill-emerald-600" />
+//                 <span className="text-sm">Volunteer Mode</span>
+//               </button>
+//             )}
+
+//             {/* LOGOUT BUTTON */}
+//             <button 
+//               onClick={() => { setToken(null); setUser(null); localStorage.removeItem('sharemeal_token'); localStorage.removeItem('sharemeal_user'); }}
+//               className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors shrink-0"
+//               title="Log Out"
+//             >
+//               <LogOut size={20} />
+//             </button>
+
+//             {/* MOBILE MENU TOGGLE */}
+//             <button 
+//               className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-xl shrink-0"
+//               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+//             >
+//               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+//             </button>
+//           </div>
+
+//         </div>
+//       </nav>
+          <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 z-50 shadow-sm shrink-0">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between relative">
+          
+          {/* LEFT SIDE: LOGO & LOCATION (Fixed for Mobile) */}
+          <div className="flex items-center gap-3 sm:gap-8">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveScreen('feed'); setIsMobileMenuOpen(false); }}>
+              <ShareMealLogo isDonor={isDonor} className="h-8 w-8" />
+              <span className="hidden sm:block text-xl font-extrabold tracking-tight">ShareMeal</span>
             </div>
             
-            <div className="min-w-0 flex-1">
-              <LiveLocationBadge isDonor={isDonor} />
-            </div>
+            {/* Removed 'hidden sm:block' so it renders on mobile */}
+            <div><LiveLocationBadge isDonor={isDonor} /></div>
           </div>
 
-          {/* RIGHT SIDE: PROFILE & ACTIONS */}
-          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-            
-            {/* DONATE FOOD / POST BUTTON */}
-            {isDonor ? (
-              <button 
-                onClick={() => setActiveScreen('post')}
-                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-[#0B3529] hover:bg-[#125441] text-[#D4AF37] rounded-xl font-bold transition-all shadow-sm"
-              >
-                <Plus size={18} />
-                {/* 🌟 THE FIX: Hidden on mobile, visible on sm and up */}
-                <span className="hidden sm:block text-sm">Donate Food</span>
-              </button>
-            ) : (
-              <button className="hidden sm:flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl font-bold">
-                <Heart size={18} className="fill-emerald-600" />
-                <span className="text-sm">Volunteer Mode</span>
-              </button>
-            )}
+          {/* ... [Rest of your Navbar code] ... */}
 
-            {/* LOGOUT BUTTON */}
+          {/* MOBILE ONLY: CENTERED DONATE FOOD BUTTON */}
+          {user?.role === 'donor' && (
             <button 
-              onClick={() => { setToken(null); setUser(null); localStorage.removeItem('sharemeal_token'); localStorage.removeItem('sharemeal_user'); }}
-              className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors shrink-0"
-              title="Log Out"
+              onClick={() => { setActiveScreen('create'); setIsMobileMenuOpen(false); }} 
+              className={`sm:hidden text-xs font-bold flex items-center gap-1 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white px-3 py-2 rounded-xl shadow-sm absolute left-1/2 transform -translate-x-1/2 cursor-pointer transition-all ${activeScreen === 'create' ? 'ring-2 ring-emerald-400' : ''}`}
             >
-              <LogOut size={20} />
+              <Plus size={14} /> <span className="hidden sm:block text-sm">Donate Food</span>
             </button>
+          )}
 
-            {/* MOBILE MENU TOGGLE */}
+          {/* DESKTOP ACTIONS: AUTO HIDDEN ON MOBILE */}
+          <div className="hidden sm:flex items-center gap-6">
+            <button onClick={() => setActiveScreen('feed')} className={`text-sm font-bold flex items-center gap-1.5 cursor-pointer transition-all ${activeScreen === 'feed' ? `${theme.primaryText} border-b-2 ${theme.accentBorder} pb-1` : 'text-gray-400 hover:text-gray-600'}`}><Compass size={16} /> <span>Find Food</span></button>
+            {user?.role === 'donor' && <button onClick={() => setActiveScreen('create')} className={`text-sm font-bold flex items-center gap-1.5 cursor-pointer transition-all ${activeScreen === 'create' ? `${theme.primaryText} border-b-2 ${theme.accentBorder} pb-1` : 'text-gray-400 hover:text-gray-600'}`}><Plus size={16} /> <span>Donate Food</span></button>}
+            
+            <div className="h-5 w-[1px] bg-gray-200" />
+
+            <div className="relative bg-[#EBEDEA] p-1 rounded-xl flex items-center border border-gray-200/50 w-44 h-10 shadow-inner">
+              <div className={`absolute top-1 bottom-1 left-1 rounded-lg transition-all duration-300 shadow-sm ${isDonor ? 'w-[82px] translate-x-0 bg-[#0B3529]' : 'w-[82px] translate-x-[80px] bg-[#2E0854]'}`} />
+              <button onClick={() => toggleRole('donor')} className={`z-10 flex-1 flex items-center justify-center gap-1 h-full text-xs font-bold cursor-pointer transition-colors ${isDonor ? 'text-[#D4AF37]' : 'text-gray-500'}`}><Building size={12} /> Donor</button>
+              <button onClick={() => toggleRole('volunteer')} className={`z-10 flex-1 flex items-center justify-center gap-1 h-full text-xs font-bold cursor-pointer transition-colors ${!isDonor ? 'text-[#FF6B35]' : 'text-gray-500'}`}><User size={12} /> Rescue</button>
+            </div>
+
+            <button onClick={() => setActiveScreen('account')} className={`cursor-pointer transform hover:scale-105 active:scale-95 transition-all ${activeScreen === 'account' ? theme.primaryText : 'text-gray-400'}`}><UserCircle size={22} /></button>
+            <button onClick={() => { localStorage.clear(); setUser(null); setToken(null); }} className="text-gray-400 hover:text-rose-600 cursor-pointer"><LogOut size={16} /></button>
+          </div>
+
+          {/* MOBILE ONLY: 3-LINE MENU TOGGLE BUTTON */}
+          <div className="sm:hidden flex items-center">
             <button 
-              className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-xl shrink-0"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+              className="text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer p-1 transition-transform active:scale-90"
             >
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
-
         </div>
+
+        {/* MOBILE DROPDOWN MODAL SLIDE */}
+        {isMobileMenuOpen && (
+          <div className="sm:hidden absolute top-20 left-0 right-0 bg-white border-b border-gray-200 shadow-xl p-5 flex flex-col gap-4 z-40 animate-[fadeIn_0.2s_ease-out]">
+            <button 
+              onClick={() => { setActiveScreen('feed'); setIsMobileMenuOpen(false); }} 
+              className={`w-full py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${activeScreen === 'feed' ? `${theme.lightBg} ${theme.primaryText}` : 'text-gray-600 hover:bg-gray-50'}`}
+            >
+              <Compass size={18} /> <span>Find Food</span>
+            </button>
+
+            <div className="relative bg-[#EBEDEA] p-1 rounded-xl flex items-center border border-gray-200/50 w-full h-12 shadow-inner mt-1">
+              <div 
+                className="absolute top-1 bottom-1 rounded-lg transition-all duration-300 shadow-sm"
+                style={{
+                  width: 'calc(50% - 6px)',
+                  left: isDonor ? '4px' : 'calc(50% + 2px)',
+                  backgroundColor: isDonor ? '#0B3529' : '#2E0854'
+                }}
+              />
+              <button 
+                onClick={() => { toggleRole('donor'); }} 
+                className={`z-10 flex-1 flex items-center justify-center gap-1.5 h-full text-xs font-extrabold cursor-pointer transition-colors ${isDonor ? 'text-[#D4AF37]' : 'text-gray-500'}`}
+              >
+                <Building size={14} /> Donor
+              </button>
+              <button 
+                onClick={() => { toggleRole('volunteer'); }} 
+                className={`z-10 flex-1 flex items-center justify-center gap-1.5 h-full text-xs font-extrabold cursor-pointer transition-colors ${!isDonor ? 'text-[#FF6B35]' : 'text-gray-500'}`}
+              >
+                <User size={14} /> Rescue
+              </button>
+            </div>
+
+            <div className="h-[1px] bg-gray-100 my-1" />
+
+            <div className="flex items-center justify-between gap-3">
+              <button 
+                onClick={() => { setActiveScreen('account'); setIsMobileMenuOpen(false); }} 
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 border border-gray-200 transition-all ${activeScreen === 'account' ? `${theme.lightBg} ${theme.primaryText} border-transparent` : 'text-gray-600 bg-white hover:bg-gray-50'}`}
+              >
+                <UserCircle size={18} /> <span>Account Center</span>
+              </button>
+              
+              <button 
+                onClick={() => { localStorage.clear(); setUser(null); setToken(null); setIsMobileMenuOpen(false); }} 
+                className="p-3 bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-100 rounded-xl cursor-pointer flex items-center justify-center transition-colors"
+                title="Log Out"
+              >
+                <LogOut size={18} />
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
-          
       {/* STREAM MONITOR HEADER */}
       {activeScreen === 'feed' && (
         <header className={`relative w-full py-16 px-6 border-b border-gray-100 overflow-hidden bg-gradient-to-b ${theme.heroGradient} shrink-0`}>
