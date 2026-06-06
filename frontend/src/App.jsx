@@ -1555,7 +1555,6 @@ const handleAuth = async (e) => {
 
         </div>
       </nav>
-          {/* MOBILE ONLY: CENTERED DONATE FOOD BUTTON */}
           {user?.role === 'donor' && (
             <button 
               onClick={() => { setActiveScreen('create'); setIsMobileMenuOpen(false); }} 
