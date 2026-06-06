@@ -116,7 +116,8 @@ app.post('/api/listings', authenticateToken, async (req, res) => {
       donorId: req.user.id
     });
     await newListing.save();
-    const telegramMsg = `🚨 *FOOD SURPLUS ALERT* 🚨\n\n*Venue:* ${newListing.hallName}\n*Food:* ${newListing.foodDetails}\n*Servings / Plates:* ~${newListing.totalServings} Plates\n🌱 *Food Details:* ${newListing.isVeg ? '🌱 Pure Veg' : '🍗 Non-Veg'}\n*Location:* ${newListing.location}\n*Contact:* ${newListing.contact}\n\nReply to this message with "*Claimed [Venue Name]*" once your're ready to collect.\n*Thank You 😊*`;
+    const telegramMsg = `🚨 *FOOD SURPLUS ALERT* 🚨\n\n*Venue:* ${newListing.hallName}\n*Food:* ${newListing.foodDetails}\n*Servings / Plates:* ~${newListing.totalServings} Plates\n🌱 *Food Details:* ${newListing.isVeg ? '🌱 Pure Veg' : '🍗 Non-Veg'}\n*Location:* ${newListing.location}\n*Contact:* ${newListing.contact}\n\n👉 *Claim this donation instantly:*\n[Click here to open ShareMeal Dashboard](https://https://sharemeal-app.vercel.app/)`;
+    //const telegramMsg = `🚨 *FOOD SURPLUS ALERT* 🚨\n\n*Venue:* ${newListing.hallName}\n*Food:* ${newListing.foodDetails}\n*Servings / Plates:* ~${newListing.totalServings} Plates\n🌱 *Food Details:* ${newListing.isVeg ? '🌱 Pure Veg' : '🍗 Non-Veg'}\n*Location:* ${newListing.location}\n*Contact:* ${newListing.contact}\n\nReply to this message with "*Claimed [Venue Name]*" once your're ready to collect.\n*Thank You 😊*`;
     if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
       await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
@@ -154,38 +155,39 @@ app.patch('/api/listings/:id/complete', authenticateToken, async (req, res) => {
 let lastUpdateId = 0;
 async function pollTelegramUpdates() {
   if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) return;
-  try {
-    const response = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}`);
-    const data = await response.json();
-    if (data.ok && data.result.length > 0) {
-      for (const update of data.result) {
-        lastUpdateId = update.update_id;
-        const msg = update.message || update.channel_post;
-        if (msg && msg.text) {
-          const incomingText = msg.text.toLowerCase();
-          if (incomingText.includes('bought') || incomingText.includes('claimed') || incomingText.includes('collected')) {
-            const activeEvents = await Listing.find({ status: 'available' });
-            for (const event of activeEvents) {
-              if (incomingText.includes(event.hallName.toLowerCase())) {
-                const responderName = msg.from ? msg.from.first_name : 'Telegram Channel Client';
-                event.status = 'claimed';
-                event.servingsAvailable = 0; 
-                event.volunteerName = responderName;
-                await event.save();
+  // try {
+  //   const response = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}`);
+  //   const data = await response.json();
+  //   if (data.ok && data.result.length > 0) {
+  //     for (const update of data.result) {
+  //       lastUpdateId = update.update_id;
+  //       const msg = update.message || update.channel_post;
+  //       if (msg && msg.text) {
+  //         const incomingText = msg.text.toLowerCase();
+  //         if (incomingText.includes('bought') || incomingText.includes('claimed') || incomingText.includes('collected')) {
+  //           const activeEvents = await Listing.find({ status: 'available' });
+  //           for (const event of activeEvents) {
+  //             if (incomingText.includes(event.hallName.toLowerCase())) {
+  //               const responderName = msg.from ? msg.from.first_name : 'Telegram Channel Client';
+  //               event.status = 'claimed';
+  //               event.servingsAvailable = 0; 
+  //               event.volunteerName = responderName;
+  //               await event.save();
                 
-                const ack = `*ORDER CLAIMED* Food on Venue *${event.hallName}* successfully CLAIMED by user *${responderName}* via Telegram Interlock.\n\n*We kindly request you to take a picture of the order and post it in the App to complete the order.*\n\n*THANK YOU*`;
-                await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ chat_id: process.env.TELEGRAM_CHAT_ID, text: ack, parse_mode: 'Markdown' })
-                });
-              }
-            }
-          }
-        }
-      }
-    }
-  } catch (err) { console.error("Polling system interface warning caught:", err); }
+  //               const ack = `*ORDER CLAIMED* Food on Venue *${event.hallName}* successfully CLAIMED by user *${responderName}* via Telegram Interlock.\n\n*We kindly request you to take a picture of the order and post it in the App to complete the order.*\n\n*THANK YOU*`;
+  //               await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+  //                 method: 'POST',
+  //                 headers: { 'Content-Type': 'application/json' },
+  //                 body: JSON.stringify({ chat_id: process.env.TELEGRAM_CHAT_ID, text: ack, parse_mode: 'Markdown' })
+  //               });
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // } 
+  catch (err) { console.error("Polling system interface warning caught:", err); }
   setTimeout(pollTelegramUpdates, 4000);
 }
 const PORT = process.env.PORT || 5000;
