@@ -727,7 +727,7 @@ const handleAuth = async (e) => {
             <button onClick={() => { localStorage.clear(); setUser(null); setToken(null); }} className="text-gray-400 hover:text-rose-600 cursor-pointer"><LogOut size={16} /></button>
           </div>
 
-          {/* MOBILE ONLY: 3-LINE MENU TOGGLE BUTTON */}
+          {/* MOBILE ONLY: 3-LINE MENU TOGGLE BUTTON 
           <div className="sm:hidden flex items-center">
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
@@ -735,7 +735,7 @@ const handleAuth = async (e) => {
             >
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
-          </div>
+          </div>*/}
         </div>
 
         {/* MOBILE DROPDOWN MODAL SLIDE */}
