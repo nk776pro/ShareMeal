@@ -116,7 +116,7 @@ app.post('/api/listings', authenticateToken, async (req, res) => {
       donorId: req.user.id
     });
     await newListing.save();
-    const telegramMsg = `🚨 *FOOD SURPLUS ALERT* 🚨\n\n*Venue:* ${newListing.hallName}\n*Food:* ${newListing.foodDetails}\n*Servings / Plates:* ~${newListing.totalServings} Plates\n🌱 *Food Details:* ${newListing.isVeg ? '🌱 Pure Veg' : '🍗 Non-Veg'}\n*Location:* ${newListing.location}\n*Contact:* ${newListing.contact}\n\n👉 *Claim this donation instantly:*\n[Click here to open ShareMeal Dashboard](https://sharemeal-app.vercel.app/)`;
+    const telegramMsg = `🚨 *FOOD SURPLUS ALERT* 🚨\n\n*Venue:* ${newListing.hallName}\n*Food:* ${newListing.foodDetails}\n*Servings / Plates:* ~${newListing.totalServings} Plates\n*Food Details:* ${newListing.isVeg ? '🌱 Pure Veg' : '🍗 Non-Veg'}\n*Location:* ${newListing.location}\n*Contact:* ${newListing.contact}\n\n👉 *Claim this donation instantly:*\n[Click here to open ShareMeal Dashboard](https://sharemeal-app.vercel.app/)`;
     //const telegramMsg = `🚨 *FOOD SURPLUS ALERT* 🚨\n\n*Venue:* ${newListing.hallName}\n*Food:* ${newListing.foodDetails}\n*Servings / Plates:* ~${newListing.totalServings} Plates\n🌱 *Food Details:* ${newListing.isVeg ? '🌱 Pure Veg' : '🍗 Non-Veg'}\n*Location:* ${newListing.location}\n*Contact:* ${newListing.contact}\n\nReply to this message with "*Claimed [Venue Name]*" once your're ready to collect.\n*Thank You 😊*`;
     if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
       await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
@@ -141,7 +141,7 @@ app.patch('/api/listings/:id/claim', authenticateToken, async (req, res) => {
 app.patch('/api/listings/:id/complete', authenticateToken, async (req, res) => {
   try {
     const completedListing = await Listing.findByIdAndUpdate(req.params.id, { status: 'completed', proofPhotoUrl: req.body.photoUrl }, { new: true });
-    const completionMessage = `*RESCUE SUCCESS CONFIRMED* 🎉\n\n✅ Supply from *${completedListing.hallName}* completely allocated.\n🤝 Assigned Courier Node: *${completedListing.volunteerName}*\n📸 Verification image secured safely.`;
+    const completionMessage = `*RESCUE SUCCESS CONFIRMED* 🎉\n\n✅ Supply from *${completedListing.hallName}* completely allocated.\n🤝 Assigned To: *${completedListing.volunteerName}*\n📸 Verification image secured safely.`;
     if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
       await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
