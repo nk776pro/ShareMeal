@@ -116,7 +116,7 @@ app.post('/api/listings', authenticateToken, async (req, res) => {
       donorId: req.user.id
     });
     await newListing.save();
-    const telegramMsg = `🚨 *FOOD SURPLUS ALERT* 🚨\n\n*Venue:* ${newListing.hallName}\n*Food:* ${newListing.foodDetails}\n*Servings / Plates:* ~${newListing.totalServings} Plates\n🌱 *Food Details:* ${newListing.isVeg ? '🌱 Pure Veg' : '🍗 Non-Veg'}\n*Location:* ${newListing.location}\n*Contact:* ${newListing.contact}\n\n👉 *Claim this donation instantly:*\n[Click here to open ShareMeal Dashboard](https://https://sharemeal-app.vercel.app/)`;
+    const telegramMsg = `🚨 *FOOD SURPLUS ALERT* 🚨\n\n*Venue:* ${newListing.hallName}\n*Food:* ${newListing.foodDetails}\n*Servings / Plates:* ~${newListing.totalServings} Plates\n🌱 *Food Details:* ${newListing.isVeg ? '🌱 Pure Veg' : '🍗 Non-Veg'}\n*Location:* ${newListing.location}\n*Contact:* ${newListing.contact}\n\n👉 *Claim this donation instantly:*\n[Click here to open ShareMeal Dashboard](https://sharemeal-app.vercel.app/)`;
     //const telegramMsg = `🚨 *FOOD SURPLUS ALERT* 🚨\n\n*Venue:* ${newListing.hallName}\n*Food:* ${newListing.foodDetails}\n*Servings / Plates:* ~${newListing.totalServings} Plates\n🌱 *Food Details:* ${newListing.isVeg ? '🌱 Pure Veg' : '🍗 Non-Veg'}\n*Location:* ${newListing.location}\n*Contact:* ${newListing.contact}\n\nReply to this message with "*Claimed [Venue Name]*" once your're ready to collect.\n*Thank You 😊*`;
     if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
       await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
