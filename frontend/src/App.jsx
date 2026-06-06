@@ -1495,24 +1495,66 @@ const handleAuth = async (e) => {
   return (
     <div className={`flex flex-col min-h-screen bg-[#FAFAFA] ${theme.primaryText} font-sans antialiased tracking-tight transition-all duration-300 ease-out ${isTransitioning ? 'opacity-30 scale-[0.99] filter blur-sm' : 'opacity-100 scale-100'}`}>
       
-      {/* GLOBAL NAVBAR */}
-  {/* GLOBAL NAVBAR */}
+      
+{/* GLOBAL NAVBAR */}
       <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 z-50 shadow-sm shrink-0">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between relative">
+        {/* Adjusted padding and height for mobile */}
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2">
           
-          {/* LEFT SIDE: LOGO & LOCATION (Fixed for Mobile) */}
-          <div className="flex items-center gap-3 sm:gap-8">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveScreen('feed'); setIsMobileMenuOpen(false); }}>
-              <ShareMealLogo isDonor={isDonor} className="h-8 w-8" />
-              <span className="hidden sm:block text-xl font-extrabold tracking-tight">ShareMeal</span>
+          {/* LEFT SIDE: LOGO & LOCATION */}
+          {/* Added min-w-0 so the location text can truncate instead of pushing other items */}
+          <div className="flex items-center gap-2 sm:gap-6 min-w-0 flex-1">
+            <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={() => { setActiveScreen('feed'); setIsMobileMenuOpen(false); }}>
+              <ShareMealLogo isDonor={isDonor} className="h-7 w-7 sm:h-8 sm:w-8" />
+              {/* Hide "ShareMeal" text on small screens, show on lg screens */}
+              <span className="hidden lg:block text-xl font-extrabold tracking-tight">ShareMeal</span>
             </div>
             
-            {/* Removed 'hidden sm:block' so it renders on mobile */}
-            <div><LiveLocationBadge isDonor={isDonor} /></div>
+            <div className="min-w-0 flex-1">
+              <LiveLocationBadge isDonor={isDonor} />
+            </div>
           </div>
 
-          {/* ... [Rest of your Navbar code] ... */}
+          {/* RIGHT SIDE: PROFILE & ACTIONS */}
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+            
+            {/* DONATE FOOD / POST BUTTON */}
+            {isDonor ? (
+              <button 
+                onClick={() => setActiveScreen('post')}
+                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-[#0B3529] hover:bg-[#125441] text-[#D4AF37] rounded-xl font-bold transition-all shadow-sm"
+              >
+                <Plus size={18} />
+                {/* 🌟 THE FIX: Hidden on mobile, visible on sm and up */}
+                <span className="hidden sm:block text-sm">Donate Food</span>
+              </button>
+            ) : (
+              <button className="hidden sm:flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl font-bold">
+                <Heart size={18} className="fill-emerald-600" />
+                <span className="text-sm">Volunteer Mode</span>
+              </button>
+            )}
 
+            {/* LOGOUT BUTTON */}
+            <button 
+              onClick={() => { setToken(null); setUser(null); localStorage.removeItem('sharemeal_token'); localStorage.removeItem('sharemeal_user'); }}
+              className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors shrink-0"
+              title="Log Out"
+            >
+              <LogOut size={20} />
+            </button>
+
+            {/* MOBILE MENU TOGGLE */}
+            <button 
+              className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-xl shrink-0"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+
+        </div>
+      </nav>
           {/* MOBILE ONLY: CENTERED DONATE FOOD BUTTON */}
           {user?.role === 'donor' && (
             <button 
