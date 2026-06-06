@@ -1663,7 +1663,6 @@ const handleAuth = async (e) => {
           </div>
         )}
       </nav>
-      {/* STREAM MONITOR HEADER */}
       {activeScreen === 'feed' && (
         <header className={`relative w-full py-16 px-6 border-b border-gray-100 overflow-hidden bg-gradient-to-b ${theme.heroGradient} shrink-0`}>
           <div className="max-w-4xl mx-auto text-center space-y-5">
