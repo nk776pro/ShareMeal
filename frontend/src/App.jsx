@@ -184,6 +184,7 @@ function LegalModal({ isOpen, type, onClose }) {
 
 // Total App
 export default function App() {
+  <Analytics/>
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('sharemeal_user')) || null);
   const [token, setToken] = useState(localStorage.getItem('sharemeal_token') || null);
   const [authMode, setAuthMode] = useState('login'); 
