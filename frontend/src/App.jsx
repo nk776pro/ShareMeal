@@ -1,6 +1,6 @@
 import ShareMealLogo from './ShareMealLogo';
 import { useState, useEffect } from 'react';
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react"
 import { MapPin, PhoneCall, Send, LogOut, Compass, Search, ArrowRight, Heart, Star, Filter, Plus, Flame, Sparkles, Camera, Building, User, UserCircle, Settings, Shield, Award, CheckCircle2, Menu, X} from 'lucide-react';
 
 //Environment variables
