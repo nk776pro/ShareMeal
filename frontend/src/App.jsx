@@ -184,7 +184,6 @@ function LegalModal({ isOpen, type, onClose }) {
 
 // Total App
 export default function App() {
-  <Analytics/>
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('sharemeal_user')) || null);
   const [token, setToken] = useState(localStorage.getItem('sharemeal_token') || null);
   const [authMode, setAuthMode] = useState('login'); 
@@ -523,6 +522,7 @@ const handleAuth = async (e) => {
 
   if (!user) {
     return (
+      <Analytics />
       <div className="min-h-screen bg-[#F3F5F4] flex flex-col items-center justify-center p-4 tracking-tight">
         <div className="w-full max-w-sm bg-white p-8 rounded-3xl shadow-sm border border-gray-100 relative">
           
@@ -563,6 +563,7 @@ const handleAuth = async (e) => {
     );
   }
   return (
+    <Analytics />
     <div className={`flex flex-col min-h-screen bg-[#FAFAFA] ${theme.primaryText} font-sans antialiased tracking-tight transition-all duration-300 ease-out ${isTransitioning ? 'opacity-30 scale-[0.99] filter blur-sm' : 'opacity-100 scale-100'}`}>
           <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-100 z-50 shadow-sm shrink-0">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between relative">
